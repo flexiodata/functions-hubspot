@@ -16,7 +16,8 @@ import json
 # main function entry point
 def flexio_handler(flex):
 
-    auth_token = '' # TODO: populate the authorization token
+    # get the api key from the variable input
+    auth_token = flex.vars.get('hubspot-api-key', '')
 
     # get the contacts; see API for more info: https://developers.hubspot.com/docs/methods/contacts/get_contacts
     url = 'https://api.hubapi.com/contacts/v1/lists/all/contacts/all?hapikey=' + auth_token

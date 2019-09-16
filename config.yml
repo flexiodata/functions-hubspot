@@ -1,0 +1,14 @@
+
+title: Hubspot Function Pack
+description: Functions for accessing your Hubspot info
+image:
+  src: /assets/mbp-720px.png
+  alt:
+
+params:
+- name: hubspot-api-key
+  type: text
+  description: Hubspot API Key
+  prompt: Enter your API Key
+  required: true
+

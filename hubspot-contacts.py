@@ -1,5 +1,14 @@
 
-# return a list of hubspot contacts: https://developers.hubspot.com/docs/methods/contacts/get_contacts
+# ---
+# name: hubspot-contacts
+# deployed: true
+# title: Hubspot Contacts
+# description: Returns a list of contacts from Hubspot
+# params:
+# examples:
+# notes: |-
+# ---
+
 
 import requests
 import json
@@ -9,7 +18,7 @@ def flexio_handler(flex):
 
     auth_token = '' # TODO: populate the authorization token
 
-    # get the contacts
+    # get the contacts; see API for more info: https://developers.hubspot.com/docs/methods/contacts/get_contacts
     url = 'https://api.hubapi.com/contacts/v1/lists/all/contacts/all?hapikey=' + auth_token
 
     columns = ['firstname', 'lastname', 'jobtitle', 'email', 'phone', 'mobilephone', 'address', 'city', 'state', 'zip', 'country', 'linkedinbio', 'createdate', 'lastmodifieddate']

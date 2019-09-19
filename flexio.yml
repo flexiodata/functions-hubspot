@@ -2,15 +2,15 @@
 title: Hubspot Function Pack
 description: Functions for accessing your Hubspot info
 image:
-  src: /assets/mbp-720px.png
-  alt:
+  src: https://logo.clearbit.com/hubspot.com
+  alt: HubSpot logo
 
 prompts:
   - element: form
     name: form_splash
     description: |
       <div class="tc pt4">
-        <img src="https://logo.clearbit.com/hubspot.com" />
+        <img src="https://logo.clearbit.com/hubspot.com" alt="HubSpot logo" />
         <h1 style="margin: 0">HubSpot Function Pack</h1>
         <h2 style="margin: 0; border: 0">Functions for accessing your Hubspot info</h2>
       </div>

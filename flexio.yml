@@ -5,10 +5,31 @@ image:
   src: /assets/mbp-720px.png
   alt:
 
-params:
-- name: hubspot-api-key
-  type: text
-  description: Hubspot API Key
-  prompt: Enter your API Key
-  required: true
+prompts:
+  - element: form
+    name: form_splash
+    description: |
+      <div class="tc pt4">
+        <img src="https://logo.clearbit.com/hubspot.com" />
+        <h1 style="margin: 0">HubSpot Function Pack</h1>
+        <h2 style="margin: 0; border: 0">Functions for accessing your Hubspot info</h2>
+      </div>
+  - element: form
+    name: form_api_key
+    title: HubSpot API key
+    description: |
+      Use your HubSpot API key to access the same APIs that power all HubSpot tools.
 
+      This key is stored securely by Flex.io and will allow the functions in this function pack to access your HubSpot account without exposing your credentials.
+    class: el-form--cozy el-form__label-tiny
+    rules:
+      hubspot_api_key:
+        - required: true
+          message: Please enter a valid API key to continue.
+    form_items:
+      - element: input
+        type: text
+        name: hubspot_api_key
+        label: API key
+        placeholder: API key
+        value: ''

@@ -4,7 +4,8 @@ description: Functions for accessing your Hubspot info
 image:
   src: https://logo.clearbit.com/hubspot.com
   alt: HubSpot logo
-
+functions:
+- path: hubspot-contacts.py
 prompts:
   - element: form
     name: form_splash

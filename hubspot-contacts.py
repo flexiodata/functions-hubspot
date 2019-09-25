@@ -2,8 +2,8 @@
 # ---
 # name: hubspot-contacts
 # deployed: true
-# title: Hubspot Contacts
-# description: Returns a list of contacts from Hubspot
+# title: HubSpot Contacts
+# description: Returns a list of contacts from HubSpot
 # params:
 # examples:
 # notes: |-

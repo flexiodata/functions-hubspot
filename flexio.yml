@@ -1,5 +1,4 @@
-
-title: HubSpot Function Pack
+title: HubSpot Integration
 description: Functions for accessing your HubSpot info
 image:
   src: https://logo.clearbit.com/hubspot.com
@@ -13,7 +12,7 @@ prompts:
     description: |
       Use your HubSpot API key to access the same APIs that power all HubSpot tools.
 
-      This key is stored securely by Flex.io and will allow the functions in this function pack to access your HubSpot account without exposing your credentials.
+      This key is stored securely by Flex.io and will allow the functions in this integration to access your HubSpot account without exposing your credentials.
     class: el-form--cozy el-form__label-tiny
     rules:
       hubspot_api_key:

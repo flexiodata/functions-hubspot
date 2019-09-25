@@ -1,20 +1,12 @@
 
-title: Hubspot Function Pack
-description: Functions for accessing your Hubspot info
+title: HubSpot Function Pack
+description: Functions for accessing your HubSpot info
 image:
   src: https://logo.clearbit.com/hubspot.com
   alt: HubSpot logo
 functions:
-- path: hubspot-contacts.py
+  - path: hubspot-contacts.py
 prompts:
-  - element: form
-    name: form_splash
-    description: |
-      <div class="tc pt4">
-        <img src="https://logo.clearbit.com/hubspot.com" alt="HubSpot logo" />
-        <h1 style="margin: 0">HubSpot Function Pack</h1>
-        <h2 style="margin: 0; border: 0">Functions for accessing your Hubspot info</h2>
-      </div>
   - element: form
     name: form_api_key
     title: HubSpot API key

@@ -57,7 +57,7 @@ def flexio_handler(flex):
     # define the expected parameters and map the values to the parameter names
     # based on the positions of the keys/values
     params = OrderedDict()
-    params['properties'] = {'required': False, 'validator': validator_list, 'coerce': to_list, 'default': 'full_name'}
+    params['properties'] = {'required': False, 'validator': validator_list, 'coerce': to_list, 'default': 'email'}
     input = dict(zip(params.keys(), input))
 
     # validate the mapped input against the validator
@@ -71,7 +71,7 @@ def flexio_handler(flex):
 
         # map this function's property names to the API's property names
         property_map = {
-            'full_name': 'firstname',
+            'first_name': 'firstname',
             'last_name': 'lastname',
             'email': 'email',
             'phone': 'phone',

@@ -7,14 +7,14 @@
 # params:
 #   - name: properties
 #     type: array
-#     description: The properties to return (defaults to 'email'). See "Notes" for a listing of the available properties.
+#     description: The properties to return (defaults to all properties). See "Notes" for a listing of the available properties.
 #     required: false
 # examples:
-# notes: |-
-#   The following properties are allowed:
+# notes: |
+#   The following properties are available:
 #     * `first_name`: first name of the person
 #     * `last_name`: last name of the person
-#     * `email`: email address of the person (default)
+#     * `email`: email address of the person
 #     * `phone`: phone number of the person
 #     * `phone_mobile`: mobile phone number of the person
 #     * `job_title`: job title of the person
@@ -23,7 +23,7 @@
 #     * `state`: state in which the person is located
 #     * `zip`: zip code in which the person is located
 #     * `country`: country in which the person is located
-#     * `linkedin`: biography of the person on LinkedIn
+#     * `linkedin_bio`: biography of the person on LinkedIn
 #     * `created_date`: date the record for this person was created
 #     * `modified_date`: last date the record for this person was modified
 # ---
@@ -57,7 +57,7 @@ def flexio_handler(flex):
     # define the expected parameters and map the values to the parameter names
     # based on the positions of the keys/values
     params = OrderedDict()
-    params['properties'] = {'required': False, 'validator': validator_list, 'coerce': to_list, 'default': 'email'}
+    params['properties'] = {'required': False, 'validator': validator_list, 'coerce': to_list, 'default': '*'}
     input = dict(zip(params.keys(), input))
 
     # validate the mapped input against the validator
@@ -67,28 +67,31 @@ def flexio_handler(flex):
     if input is None:
         raise ValueError
 
-    try:
+    # map this function's property names to the API's property names
+    property_map = OrderedDict()
+    property_map['first_name'] = 'firstname'
+    property_map['last_name'] = 'lastname'
+    property_map['email'] = 'email'
+    property_map['phone'] = 'phone'
+    property_map['phone_mobile'] = 'mobilephone'
+    property_map['job_title'] = 'jobtitle'
+    property_map['address'] = 'address'
+    property_map['city'] = 'city'
+    property_map['state'] = 'state'
+    property_map['zip'] = 'zip'
+    property_map['country'] = 'country'
+    property_map['linkedin_bio'] = 'linkedinbio'
+    property_map['created_date'] = 'createdate'
+    property_map['modified_date'] = 'lastmodifieddate'
 
-        # map this function's property names to the API's property names
-        property_map = {
-            'first_name': 'firstname',
-            'last_name': 'lastname',
-            'email': 'email',
-            'phone': 'phone',
-            'phone_mobile': 'mobilephone',
-            'job_title': 'jobtitle',
-            'address': 'address',
-            'city': 'city',
-            'state': 'state',
-            'zip': 'zip',
-            'country': 'country',
-            'linkedin': 'linkedinbio',
-            'created_date': 'createdate',
-            'modified_date': 'lastmodifieddate'
-        }
+    try:
 
         # list of this function's properties we'd like to query
         properties = [p.lower().strip() for p in input['properties']]
+
+        # if we have a wildcard, get all the properties
+        if len(properties) == 1 and properties[0] == '*':
+            properties = list(property_map.keys())
 
         # list of the HubSpot properties we'd like to query
         hubspot_properties = [property_map[p] for p in properties]
@@ -112,11 +115,12 @@ def flexio_handler(flex):
         result = []
         result.append(properties)
 
+        # build up each row and append it to the result
         contacts = content.get('contacts',[])
         for contact in contacts:
             row = []
             for p in hubspot_properties:
-                row.append(contact.get('properties').get(p,{}).get('value',''))
+                row.append(contact.get('properties').get(p,{}).get('value','') or '')
             result.append(row)
 
         # return the results

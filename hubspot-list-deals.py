@@ -7,29 +7,29 @@
 # params:
 #   - name: properties
 #     type: array
-#     description: The properties to return (defaults to all columns). See "Notes" for a listing of the available properties.
+#     description: The properties to return (defaults to all properties). See "Notes" for a listing of the available properties.
 #     required: false
 # examples:
 # notes: |
-#   The following properties are allowed:
-#     * `amt`: Amount
-#     * `amt_home`: Amount in home currency
-#     * `close_date`: Close date
-#     * `closed_lost_reason`: Closed lost reason
-#     * `closed_won_reason`: Closed won reason
-#     * `description`: Deal description
+#   The following properties are available:
 #     * `deal_name`: Deal name
 #     * `deal_owner`: Deal owner
-#     * `deal_state`: Deal stage,
-#     * `deal_type`: Deal type,
+#     * `deal_state`: Deal stage
+#     * `deal_type`: Deal type
+#     * `amt`: Amount
+#     * `amt_home`: Amount in home currency
+#     * `closed_lost_reason`: Closed lost reason
+#     * `closed_won_reason`: Closed won reason
+#     * `close_date`: Close date
+#     * `description`: Deal description
 #     * `pipeline`: Pipeline
-#     * `created_date`: Created date
 #     * `contacts_cnt`: Number of contacts
 #     * `sales_activities_cnt`: Number of sales activities
 #     * `times_contacted_cnt`: Number of times contacted
-#     * `last_updated_date`: Last activity date
 #     * `last_contacted_date`: Last contacted date
 #     * `next_activity_date`: Next activity date
+#     * `created_date`: Created date
+#     * `updated_date`: Last activity date
 # ---
 
 import json
@@ -87,10 +87,10 @@ def flexio_handler(flex):
     property_map['contacts_cnt'] = 'num_associated_contacts'
     property_map['sales_activities_cnt'] = 'num_notes'
     property_map['times_contacted_cnt'] = 'num_contacted_notes'
-    property_map['created_date'] = 'createdate'
-    property_map['updated_date'] = 'notes_last_updated'
     property_map['last_contacted_date'] = 'notes_last_contacted'
     property_map['next_activity_date'] = 'notes_next_activity_date'
+    property_map['created_date'] = 'createdate'
+    property_map['updated_date'] = 'notes_last_updated'
 
     try:
 
@@ -123,6 +123,7 @@ def flexio_handler(flex):
         result = []
         result.append(properties)
 
+        # build up each row and append it to the result
         deals = content.get('deals',[])
         for contact in deals:
             row = []

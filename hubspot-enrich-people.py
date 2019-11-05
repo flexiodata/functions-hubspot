@@ -102,7 +102,7 @@ def flexio_handler(flex):
         hubspot_properties = [property_map[p] for p in properties]
 
         # see here for more info:
-        # https://developers.hubspot.com/docs/methods/contacts/get_contacts
+        # https://developers.hubspot.com/docs/methods/contacts/get_contact_by_email
         url_query_params = {
             'hapikey': auth_token,
             'count': 100,

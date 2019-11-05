@@ -3,7 +3,7 @@
 # name: hubspot-list-contacts
 # deployed: true
 # title: HubSpot Contacts List
-# description: Returns a list of contacts from HubSpot
+# description: Returns a list of contacts from HubSpot.
 # params:
 #   - name: properties
 #     type: array

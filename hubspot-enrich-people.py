@@ -105,7 +105,6 @@ def flexio_handler(flex):
         # https://developers.hubspot.com/docs/methods/contacts/get_contact_by_email
         url_query_params = {
             'hapikey': auth_token,
-            'count': 100,
             'property': ''
         }
         url_email_str = urllib.parse.quote(input['email'])

@@ -5,6 +5,8 @@ image:
   alt: HubSpot logo
 functions:
   - path: hubspot-list-contacts.py
+  - path: hubspot-list-deals.py
+  - path: hubspot-enrich-people.py
 prompts:
   - element: form
     name: form_api_key

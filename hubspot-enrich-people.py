@@ -11,7 +11,7 @@
 #     required: true
 #   - name: properties
 #     type: array
-#     description: The properties to return (defaults to all properties). See "Notes" for a listing of the available properties.
+#     description: The properties to return (defaults to `twitter_handle`). See "Notes" for a listing of the available properties.
 #     required: false
 # examples:
 # notes: |
@@ -24,7 +24,7 @@
 #     * `state`: state in which the person is located
 #     * `company`: name of the company the person is associated with
 #     * `website`: website of the person
-#     * `twitter_handle`: the person's Twitter handle
+#     * `twitter_handle`: the person's Twitter handle (default)
 #     * `twitter_profile_photo_url`: URL of the person's Twitter profile photo
 #     * `conversion_event_cnt`: number of conversion events the person has completed
 #     * `lifecycle_stage`: lifecycle stage
@@ -62,7 +62,7 @@ def flexio_handler(flex):
     # based on the positions of the keys/values
     params = OrderedDict()
     params['email'] = {'required': True, 'type': 'string'}
-    params['properties'] = {'required': False, 'validator': validator_list, 'coerce': to_list, 'default': '*'}
+    params['properties'] = {'required': False, 'validator': validator_list, 'coerce': to_list, 'default': 'twitter_handle'}
     input = dict(zip(params.keys(), input))
 
     # validate the mapped input against the validator

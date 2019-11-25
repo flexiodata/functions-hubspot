@@ -125,10 +125,8 @@ def flexio_handler(flex):
 
         # build up each row and append it to the result
         deals = content.get('deals',[])
-        for contact in deals:
-            row = []
-            for p in hubspot_properties:
-                row.append(contact.get('properties').get(p,{}).get('value','') or '')
+        for item in deals:
+            row = [item.get('properties').get(p,{}).get('value','') or '' for p in hubspot_properties]
             result.append(row)
 
         # return the results

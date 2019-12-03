@@ -103,8 +103,10 @@ def flexio_handler(flex):
 
         # see here for more info:
         # https://developers.hubspot.com/docs/methods/contacts/get_contact_by_email
+        headers = {
+            'Authorization': 'Bearer ' + auth_token,
+        }
         url_query_params = {
-            'hapikey': auth_token,
             'property': ''
         }
         url_email_str = urllib.parse.quote(input['email'])
@@ -113,7 +115,7 @@ def flexio_handler(flex):
         url = 'https://api.hubapi.com/contacts/v1/contact/email/' + url_email_str + '/profile?' + url_query_str + properties_str
 
         # get the response data as a JSON object
-        response = requests.get(url)
+        response = requests.get(url, headers=headers)
         content = response.json()
 
         # limit the results to the requested properties

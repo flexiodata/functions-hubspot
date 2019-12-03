@@ -127,8 +127,10 @@ def getTablePage(auth_token, properties, cursor_id):
     try:
 
         # make the request
+        headers = {
+            'Authorization': 'Bearer ' + auth_token,
+        }
         url_query_params = {
-            'hapikey': auth_token,
             'count': 100,
             'property': ''
         }
@@ -145,7 +147,7 @@ def getTablePage(auth_token, properties, cursor_id):
         url = 'https://api.hubapi.com/contacts/v1/lists/all/contacts/all?' + url_query_str
 
         # get the response
-        response = requests.get(url)
+        response = requests.get(url, headers=headers)
         response.raise_for_status()
         content = response.json()
 

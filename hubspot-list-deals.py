@@ -106,8 +106,10 @@ def flexio_handler(flex):
 
         # see here for more info:
         # https://developers.hubspot.com/docs/methods/deals/get-all-deals
+        headers = {
+            'Authorization': 'Bearer ' + auth_token,
+        }
         url_query_params = {
-            'hapikey': auth_token,
             'limit': 100,
             'properties': ''
         }
@@ -116,7 +118,7 @@ def flexio_handler(flex):
         url = 'https://api.hubapi.com/deals/v1/deal/paged?' + url_query_str + properties_str
 
         # get the response data as a JSON object
-        response = requests.get(url)
+        response = requests.get(url, headers=headers)
         content = response.json()
 
         # return the info

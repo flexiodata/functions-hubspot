@@ -8,20 +8,13 @@ functions:
   - path: hubspot-list-deals.py
   - path: hubspot-enrich-people.py
 prompts:
-  - element: form
-    name: form_api_key
-    title: HubSpot API key
+  - element: auth
+    name: auth
+    title: Connect to HubSpot
     description: |
-      Use your HubSpot API key to access the same APIs that power all HubSpot tools.
-    class: el-form--cozy el-form__label-tiny
-    rules:
-      hubspot_api_key:
-        - required: true
-          message: Please enter a valid API key to continue.
+      Connect to your HubSpot account to connect the functions to your data
+    connection:
+      connection_type: hubspot
     form_items:
-      - element: input
-        type: text
-        name: hubspot_api_key
-        label: API key
-        placeholder: API key
+      - name: hubspot_connection
         value: ''

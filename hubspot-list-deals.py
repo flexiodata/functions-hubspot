@@ -44,7 +44,7 @@ from collections import OrderedDict
 def flexio_handler(flex):
 
     # get the api key from the variable input
-    auth_token = dict(flex.vars).get('hubspot_api_key')
+    auth_token = dict(flex.vars).get('hubspot_connection',{}).get('access_token')
     if auth_token is None:
         flex.output.content_type = "application/json"
         flex.output.write([[""]])

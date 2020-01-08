@@ -15,11 +15,13 @@
 # notes: |
 #   The following properties are available:
 #     * `id`: the id for the engagement
+#     * `portal_id`: the portal id for the engagement
+#     * `company_ids`: delimited-list of company ids for the engagement
 #     * `type`: the type of the engagement
 #     * `active`: the status of the engagement; true if the engagement is active and false otherwise
 #     * `created_at`: the creation date of the engagement
-#     * `created_by`: the id of the person who created the engagement
-#     * `activity_info`: information about the engagement
+#     * `last_updated`: the date the engagement was last updated
+#     * `content`: information about the engagement
 # ---
 
 import json
@@ -63,12 +65,15 @@ def flexio_handler(flex):
 
     # map this function's property names to the API's property names
     property_map = OrderedDict()
-    property_map['id'] = lambda item: item.get('engagement',{}).get('id','')
-    property_map['type'] = lambda item: item.get('engagement',{}).get('type','')
+    property_map['id'] = lambda item: str(item.get('engagement',{}).get('id',''))
+    property_map['portal_id'] = lambda item: str(item.get('engagement',{}).get('portalId',''))
+    property_map['company_ids'] = lambda item: ','.join([str(i) for i in item.get('associations',{}).get('companyIds',[])])
+    property_map['type'] = lambda item: item.get('engagement',{}).get('type','').lower()
     property_map['active'] = lambda item: item.get('engagement',{}).get('active','')
-    property_map['created_at'] = lambda item: item.get('engagement',{}).get('createdAt','')
-    property_map['created_by'] = lambda item: item.get('engagement',{}).get('createdBy','')
-    property_map['activity_info'] = lambda item: item.get('metadata',{}).get('body','')
+    property_map['created_at'] = lambda item: datetime.utcfromtimestamp(item.get('engagement',{}).get('createdAt',0)/1000).strftime('%Y-%m-%d %H:%M:%S')
+    property_map['last_updated'] = lambda item: datetime.utcfromtimestamp(item.get('engagement',{}).get('lastUpdated',0)/1000).strftime('%Y-%m-%d %H:%M:%S')
+    property_map['content'] = lambda item: item.get('metadata',{}).get('body','')
+    #property_map['metadata'] = lambda item: json.dumps(item.get('metadata',{}))
 
     # list of this function's properties we'd like to query
     properties = [p.lower().strip() for p in input['properties']]

@@ -79,7 +79,7 @@ def flexio_handler(flex):
 
     # map the list of requested properties to hubspot properties; if none are
     # available, include a blank placeholder
-    mapped_properties = [property_map.get(p,'') for p in properties]
+    mapped_properties = [property_map.get(p, lambda item: '') for p in properties]
 
     # get the results
     result = []
@@ -106,6 +106,7 @@ def getTablePage(auth_token, properties, cursor_id):
 
     # see here for more info:
     # https://developers.hubspot.com/docs/methods/engagements/get-all-engagements
+    # https://developers.hubspot.com/docs/methods/engagements/engagements-overview
 
     try:
 
@@ -131,8 +132,9 @@ def getTablePage(auth_token, properties, cursor_id):
         # get the data and the next cursor
         data = []
         results = content.get('results',[])
+
         for result_info in results:
-            row = [property_map.get(p, lambda item: '')(result_info) or '' for p in properties]
+            row = [p(result_info) or '' for p in properties]
             data.append(row)
 
         has_more = content.get('has-more', False)

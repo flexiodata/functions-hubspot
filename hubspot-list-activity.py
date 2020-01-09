@@ -76,6 +76,10 @@ def flexio_handler(flex):
                 return str(ids[0])
             else:
                 return ''
+    def convertTimestamp(ts):
+        if ts is None:
+            return ''
+        return datetime.utcfromtimestamp(int(ts)/1000).strftime('%Y-%m-%d %H:%M:%S')
     property_map = OrderedDict()
     property_map['id'] = lambda item: str(item.get('engagement',{}).get('id',''))
     property_map['portal_id'] = lambda item: str(item.get('engagement',{}).get('portalId',''))
@@ -83,8 +87,8 @@ def flexio_handler(flex):
     property_map['company_id'] = lambda item: getCompany(item)
     property_map['type'] = lambda item: item.get('engagement',{}).get('type','').lower()
     property_map['active'] = lambda item: item.get('engagement',{}).get('active','')
-    property_map['created_at'] = lambda item: datetime.utcfromtimestamp(item.get('engagement',{}).get('createdAt',0)/1000).strftime('%Y-%m-%d %H:%M:%S')
-    property_map['last_updated'] = lambda item: datetime.utcfromtimestamp(item.get('engagement',{}).get('lastUpdated',0)/1000).strftime('%Y-%m-%d %H:%M:%S')
+    property_map['created_at'] = lambda item: convertTimestamp(item.get('engagement',{}).get('createdAt',None))
+    property_map['last_updated'] = lambda item: convertTimestamp(item.get('engagement',{}).get('lastUpdated',None))
     #property_map['content'] = lambda item: item.get('metadata',{}).get('body','')
     #property_map['metadata'] = lambda item: json.dumps(item.get('metadata',{}))
 

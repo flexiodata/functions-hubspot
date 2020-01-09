@@ -125,6 +125,7 @@ def getTablePage(auth_token, properties, cursor_id):
     # see here for more info:
     # https://developers.hubspot.com/docs/methods/engagements/get-all-engagements
     # https://developers.hubspot.com/docs/methods/engagements/engagements-overview
+    # note: pagination mechanism different from other api calls; compare deal pagination
 
     try:
 

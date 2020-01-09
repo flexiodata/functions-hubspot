@@ -106,6 +106,7 @@ def flexio_handler(flex):
 
         # see here for more info:
         # https://developers.hubspot.com/docs/methods/deals/get-all-deals
+
         headers = {
             'Authorization': 'Bearer ' + auth_token,
         }

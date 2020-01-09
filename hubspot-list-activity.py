@@ -16,12 +16,12 @@
 #   The following properties are available:
 #     * `id`: the id for the engagement
 #     * `portal_id`: the portal id for the engagement
-#     * `company_ids`: delimited-list of company ids for the engagement
+#     * `deal_id`: the deal id for the engagement
+#     * `company_id`: the company id for the engagement
 #     * `type`: the type of the engagement
 #     * `active`: the status of the engagement; true if the engagement is active and false otherwise
 #     * `created_at`: the creation date of the engagement
 #     * `last_updated`: the date the engagement was last updated
-#     * `content`: information about the engagement
 # ---
 
 import json
@@ -64,15 +64,28 @@ def flexio_handler(flex):
         raise ValueError
 
     # map this function's property names to the API's property names
+    def getDeal(item):
+            ids = item.get('associations',{}).get('dealIds',[])
+            if len(ids) > 0:
+                return str(ids[0])
+            else:
+                return ''
+    def getCompany(item):
+            ids = item.get('associations',{}).get('companyIds',[])
+            if len(ids) > 0:
+                return str(ids[0])
+            else:
+                return ''
     property_map = OrderedDict()
     property_map['id'] = lambda item: str(item.get('engagement',{}).get('id',''))
     property_map['portal_id'] = lambda item: str(item.get('engagement',{}).get('portalId',''))
-    property_map['company_ids'] = lambda item: ','.join([str(i) for i in item.get('associations',{}).get('companyIds',[])])
+    property_map['deal_id'] = lambda item: getDeal(item)
+    property_map['company_id'] = lambda item: getCompany(item)
     property_map['type'] = lambda item: item.get('engagement',{}).get('type','').lower()
     property_map['active'] = lambda item: item.get('engagement',{}).get('active','')
     property_map['created_at'] = lambda item: datetime.utcfromtimestamp(item.get('engagement',{}).get('createdAt',0)/1000).strftime('%Y-%m-%d %H:%M:%S')
     property_map['last_updated'] = lambda item: datetime.utcfromtimestamp(item.get('engagement',{}).get('lastUpdated',0)/1000).strftime('%Y-%m-%d %H:%M:%S')
-    property_map['content'] = lambda item: item.get('metadata',{}).get('body','')
+    #property_map['content'] = lambda item: item.get('metadata',{}).get('body','')
     #property_map['metadata'] = lambda item: json.dumps(item.get('metadata',{}))
 
     # list of this function's properties we'd like to query
@@ -120,11 +133,10 @@ def getTablePage(auth_token, properties, cursor_id):
             'Authorization': 'Bearer ' + auth_token,
         }
         url_query_params = {
-            'count': 100,
-            'property': ''
+            'limit': 250
         }
         if cursor_id is not None:
-            url_query_params['vidOffset'] = cursor_id
+            url_query_params['offset'] = cursor_id
 
         url_query_str = urllib.parse.urlencode(url_query_params)
         url = 'https://api.hubapi.com/engagements/v1/engagements/paged?' + url_query_str
@@ -142,8 +154,8 @@ def getTablePage(auth_token, properties, cursor_id):
             row = [p(result_info) or '' for p in properties]
             data.append(row)
 
-        has_more = content.get('has-more', False)
-        next_cursor_id = content.get('vid-offset')
+        has_more = content.get('hasMore', False)
+        next_cursor_id = content.get('offset')
         if has_more is False:
             next_cursor_id = None
 

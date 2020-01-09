@@ -12,6 +12,8 @@
 # examples:
 # notes: |
 #   The following properties are available:
+#     * `portal_id`: the portal id for the deal
+#     * `deal_id`: the deal id for the deal
 #     * `deal_name`: Deal name
 #     * `deal_owner`: Deal owner
 #     * `deal_state`: Deal stage

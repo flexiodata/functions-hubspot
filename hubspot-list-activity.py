@@ -14,7 +14,7 @@
 #   - '"*"'
 # notes: |
 #   The following properties are available:
-#     * `id`: the id for the engagement
+#     * `engagement_id`: the id for the engagement
 #     * `portal_id`: the portal id for the engagement
 #     * `deal_id`: the deal id for the engagement
 #     * `company_id`: the company id for the engagement
@@ -81,7 +81,7 @@ def flexio_handler(flex):
             return ''
         return datetime.utcfromtimestamp(int(ts)/1000).strftime('%Y-%m-%d %H:%M:%S')
     property_map = OrderedDict()
-    property_map['id'] = lambda item: str(item.get('engagement',{}).get('id',''))
+    property_map['engagement_id'] = lambda item: str(item.get('engagement',{}).get('id',''))
     property_map['portal_id'] = lambda item: str(item.get('engagement',{}).get('portalId',''))
     property_map['deal_id'] = lambda item: getDeal(item)
     property_map['company_id'] = lambda item: getCompany(item)

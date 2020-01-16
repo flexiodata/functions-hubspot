@@ -75,7 +75,7 @@ def flexio_handler(flex):
 
     # map this function's property names to the API's property names
     def convertTimestamp(ts):
-        if ts is None:
+        if ts is None or ts == '':
             return ''
         return datetime.utcfromtimestamp(int(ts)/1000).strftime('%Y-%m-%d %H:%M:%S')
     property_map = OrderedDict()

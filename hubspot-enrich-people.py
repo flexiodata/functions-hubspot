@@ -11,7 +11,7 @@
 #     required: true
 #   - name: properties
 #     type: array
-#     description: The properties to return (defaults to `twitter_handle`). See "Returns" for a listing of the available properties.
+#     description: The properties to return (defaults to **twitter_handle**). See "Returns" for a listing of the available properties.
 #     required: false
 # returns:
 #   - name: first_name

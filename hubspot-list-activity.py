@@ -9,19 +9,34 @@
 #     type: array
 #     description: The properties to return (defaults to all properties). See "Notes" for a listing of the available properties.
 #     required: false
+# returns:
+#   - name: engagement_id
+#     type: string
+#     description: The id for the engagement
+#   - name: portal_id
+#     type: string
+#     description: The portal id for the engagement
+#   - name: deal_id
+#     type: string
+#     description: The deal id for the engagement
+#   - name: company_id
+#     type: string
+#     description: The company id for the engagement
+#   - name: type
+#     type: string
+#     description: The type of the engagement
+#   - name: active
+#     type: string
+#     description: The status of the engagement; true if the engagement is active and false otherwise
+#   - name: created_at
+#     type: string
+#     description: The creation date of the engagement
+#   - name: last_updated
+#     type: string
+#     description: The date the engagement was last updated
 # examples:
 #   - ' '
 #   - '"*"'
-# notes: |
-#   The following properties are available:
-#     * `engagement_id`: the id for the engagement
-#     * `portal_id`: the portal id for the engagement
-#     * `deal_id`: the deal id for the engagement
-#     * `company_id`: the company id for the engagement
-#     * `type`: the type of the engagement
-#     * `active`: the status of the engagement; true if the engagement is active and false otherwise
-#     * `created_at`: the creation date of the engagement
-#     * `last_updated`: the date the engagement was last updated
 # ---
 
 import json

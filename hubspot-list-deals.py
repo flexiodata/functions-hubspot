@@ -9,29 +9,68 @@
 #     type: array
 #     description: The properties to return (defaults to all properties). See "Notes" for a listing of the available properties.
 #     required: false
+# returns:
+#   - name: portal_id
+#     type: string
+#     description: The portal id for the deal
+#   - name: deal_id
+#     type: string
+#     description: The deal id for the deal
+#   - name: deal_name
+#     type: string
+#     description: The deal name
+#   - name: deal_owner
+#     type: string
+#     description: The deal owner
+#   - name: deal_state
+#     type: string
+#     description: The deal stage
+#   - name: deal_type
+#     type: string
+#     description: The deal type
+#   - name: amt
+#     type: string
+#     description: The deal mount
+#   - name: amt_home
+#     type: string
+#     description: The deal amount in home currency
+#   - name: closed_lost_reason
+#     type: string
+#     description: The closed lost reason
+#   - name: closed_won_reason
+#     type: string
+#     description: The closed won reason
+#   - name: close_date
+#     type: string
+#     description: The close date
+#   - name: description
+#     type: string
+#     description: The deal description
+#   - name: pipeline
+#     type: string
+#     description: The pipeline
+#   - name: contacts_cnt
+#     type: string
+#     description: The number of contacts
+#   - name: sales_activities_cnt
+#     type: string
+#     description: The number of sales activities
+#   - name: times_contacted_cnt
+#     type: string
+#     description: The number of times contacted
+#   - name: last_contacted_date
+#     type: string
+#     description: The last contacted date
+#   - name: next_activity_date
+#     type: string
+#     description: The next activity date
+#   - name: created_date
+#     type: string
+#     description: The created date
+#   - name: updated_date
+#     type: string
+#     description: The last activity date
 # examples:
-# notes: |
-#   The following properties are available:
-#     * `portal_id`: the portal id for the deal
-#     * `deal_id`: the deal id for the deal
-#     * `deal_name`: Deal name
-#     * `deal_owner`: Deal owner
-#     * `deal_state`: Deal stage
-#     * `deal_type`: Deal type
-#     * `amt`: Amount
-#     * `amt_home`: Amount in home currency
-#     * `closed_lost_reason`: Closed lost reason
-#     * `closed_won_reason`: Closed won reason
-#     * `close_date`: Close date
-#     * `description`: Deal description
-#     * `pipeline`: Pipeline
-#     * `contacts_cnt`: Number of contacts
-#     * `sales_activities_cnt`: Number of sales activities
-#     * `times_contacted_cnt`: Number of times contacted
-#     * `last_contacted_date`: Last contacted date
-#     * `next_activity_date`: Next activity date
-#     * `created_date`: Created date
-#     * `updated_date`: Last activity date
 # ---
 
 import json

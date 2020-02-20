@@ -9,26 +9,53 @@
 #     type: array
 #     description: The properties to return (defaults to all properties). See "Notes" for a listing of the available properties.
 #     required: false
+# returns:
+#   - name: first_name
+#     type: string
+#     description: The first name of the contact
+#   - name: last_name
+#     type: string
+#     description: The last name of the contact
+#   - name: email
+#     type: string
+#     description: The email address of the contact
+#   - name: phone
+#     type: string
+#     description: The phone number of the contact
+#   - name: phone_mobile
+#     type: string
+#     description: The mobile phone number of the contact
+#   - name: job_title
+#     type: string
+#     description: The job title of the contact
+#   - name: address
+#     type: string
+#     description: The address of the contact
+#   - name: city
+#     type: string
+#     description: The city in which the contact is located
+#   - name: state
+#     type: string
+#     description: The state in which the contact is located
+#   - name: zip
+#     type: string
+#     description: The zip code in which the contact is located
+#   - name: country
+#     type: string
+#     description: The country in which the contact is located
+#   - name: linkedin_bio
+#     type: string
+#     description: The biography of the contact on LinkedIn
+#   - name: created_date
+#     type: string
+#     description: The date the record for this contact was created
+#   - name: modified_date
+#     type: string
+#     description: The last date the record for this contact was modified
 # examples:
 #   - ' '
 #   - '"*"'
 #   - '"first_name, last_name, phone, email"'
-# notes: |
-#   The following properties are available:
-#     * `first_name`: first name of the contact
-#     * `last_name`: last name of the contact
-#     * `email`: email address of the contact
-#     * `phone`: phone number of the contact
-#     * `phone_mobile`: mobile phone number of the contact
-#     * `job_title`: job title of the contact
-#     * `address`: address of the contact
-#     * `city`: city in which the contact is located
-#     * `state`: state in which the contact is located
-#     * `zip`: zip code in which the contact is located
-#     * `country`: country in which the contact is located
-#     * `linkedin_bio`: biography of the contact on LinkedIn
-#     * `created_date`: date the record for this contact was created
-#     * `modified_date`: last date the record for this contact was modified
 # ---
 
 import json

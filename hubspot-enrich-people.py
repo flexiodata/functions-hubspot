@@ -13,23 +13,50 @@
 #     type: array
 #     description: The properties to return (defaults to `twitter_handle`). See "Notes" for a listing of the available properties.
 #     required: false
+# returns:
+#   - name: first_name
+#     type: string
+#     description: The first name of the person
+#   - name: last_name
+#     type: string
+#     description: The last name of the person
+#   - name: email
+#     type: string
+#     description: The email address of the person
+#   - name: job_title
+#     type: string
+#     description: The job title of the person
+#   - name: city
+#     type: string
+#     description: The city in which the person is located
+#   - name: state
+#     type: string
+#     description: The state in which the person is located
+#   - name: company
+#     type: string
+#     description: The name of the company the person is associated with
+#   - name: website
+#     type: string
+#     description: The website of the person
+#   - name: twitter_handle
+#     type: string
+#     description: The person's Twitter handle (default)
+#   - name: twitter_profile_photo_url
+#     type: string
+#     description: The URL of the person's Twitter profile photo
+#   - name: conversion_event_cnt
+#     type: string
+#     description: The number of conversion events the person has completed
+#   - name: lifecycle_stage
+#     type: string
+#     description: The lifecycle stage
+#   - name: created_date
+#     type: string
+#     description: The date the record for this person was created
+#   - name: modified_date
+#     type: string
+#     description: The last date the record for this person was modified
 # examples:
-# notes: |
-#   The following properties are available:
-#     * `first_name`: first name of the person
-#     * `last_name`: last name of the person
-#     * `email`: email address of the person
-#     * `job_title`: job title of the person
-#     * `city`: city in which the person is located
-#     * `state`: state in which the person is located
-#     * `company`: name of the company the person is associated with
-#     * `website`: website of the person
-#     * `twitter_handle`: the person's Twitter handle (default)
-#     * `twitter_profile_photo_url`: URL of the person's Twitter profile photo
-#     * `conversion_event_cnt`: number of conversion events the person has completed
-#     * `lifecycle_stage`: lifecycle stage
-#     * `created_date`: date the record for this person was created
-#     * `modified_date`: last date the record for this person was modified
 # ---
 
 import json

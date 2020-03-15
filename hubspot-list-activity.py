@@ -2,12 +2,17 @@
 # ---
 # name: hubspot-list-activity
 # deployed: true
+# config: index
 # title: HubSpot Activity List
 # description: Returns a list of activity from HubSpot.
 # params:
 #   - name: properties
 #     type: array
 #     description: The properties to return (defaults to all properties). See "Returns" for a listing of the available properties.
+#     required: false
+#   - name: filter
+#     type: string
+#     description: Filter to apply with key/values specified as a URL query string where the keys correspond to the properties to filter.
 #     required: false
 # returns:
 #   - name: engagement_id
@@ -42,9 +47,7 @@
 import json
 import requests
 import urllib
-import itertools
 from datetime import *
-from cerberus import Validator
 from collections import OrderedDict
 
 # main function entry point
@@ -56,27 +59,6 @@ def flexio_handler(flex):
         flex.output.content_type = "application/json"
         flex.output.write([[""]])
         return
-
-    # get the input
-    input = flex.input.read()
-    try:
-        input = json.loads(input)
-        if not isinstance(input, list): raise ValueError
-    except ValueError:
-        raise ValueError
-
-    # define the expected parameters and map the values to the parameter names
-    # based on the positions of the keys/values
-    params = OrderedDict()
-    params['properties'] = {'required': False, 'validator': validator_list, 'coerce': to_list, 'default': '*'}
-    input = dict(zip(params.keys(), input))
-
-    # validate the mapped input against the validator
-    # if the input is valid return an error
-    v = Validator(params, allow_unknown = True)
-    input = v.validated(input)
-    if input is None:
-        raise ValueError
 
     # map this function's property names to the API's property names
     def getDeal(item):
@@ -108,7 +90,7 @@ def flexio_handler(flex):
     #property_map['metadata'] = lambda item: json.dumps(item.get('metadata',{}))
 
     # list of this function's properties we'd like to query
-    properties = [p.lower().strip() for p in input['properties']]
+    properties = list(property_map.keys())
 
     # if we have a wildcard, get all the properties
     if len(properties) == 1 and properties[0] == '*':
@@ -184,28 +166,9 @@ def getTablePage(auth_token, properties, cursor_id):
     except:
         return {"data": [], "cursor": None}
 
-def validator_list(field, value, error):
-    if isinstance(value, str):
-        return
-    if isinstance(value, list):
-        for item in value:
-            if not isinstance(item, str):
-                error(field, 'Must be a list with only string values')
-        return
-    error(field, 'Must be a string or a list of strings')
-
 def to_string(value):
     if isinstance(value, (date, datetime)):
         return value.isoformat()
     if isinstance(value, (Decimal)):
         return str(value)
     return value
-
-def to_list(value):
-    # if we have a list of strings, create a list from them; if we have
-    # a list of lists, flatten it into a single list of strings
-    if isinstance(value, str):
-        return value.split(",")
-    if isinstance(value, list):
-        return list(itertools.chain.from_iterable(value))
-    return None

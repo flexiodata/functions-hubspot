@@ -94,53 +94,14 @@ def flexio_handler(flex):
         flex.output.write([[""]])
         return
 
-    # map this function's property names to the API's property names
-    def convertTimestamp(ts):
-        if ts is None or ts == '':
-            return ''
-        return datetime.utcfromtimestamp(int(ts)/1000).strftime('%Y-%m-%d %H:%M:%S')
-    property_map = OrderedDict()
-    property_map['portal_id'] = lambda item: str(item.get('portalId',''))
-    property_map['deal_id'] = lambda item: str(item.get('dealId',''))
-    property_map['deal_name'] = lambda item: item.get('properties',{}).get('dealname',{}).get('value','')
-    property_map['deal_owner'] = lambda item: str(item.get('properties',{}).get('hubspot_owner_id',{}).get('value',''))
-    property_map['deal_state'] = lambda item: item.get('properties',{}).get('dealstage',{}).get('value','')
-    property_map['deal_type'] = lambda item: item.get('properties',{}).get('dealtype',{}).get('value','')
-    property_map['amt'] = lambda item: item.get('properties',{}).get('amount',{}).get('value','')
-    property_map['amt_home'] = lambda item: item.get('properties',{}).get('amount_in_home_currency',{}).get('value','')
-    property_map['closed_lost_reason'] = lambda item: item.get('properties',{}).get('closed_lost_reason',{}).get('value','')
-    property_map['closed_won_reason'] = lambda item: item.get('properties',{}).get('closed_won_reason',{}).get('value','')
-    property_map['close_date'] = lambda item: convertTimestamp(item.get('properties',{}).get('closedate',{}).get('value',None))
-    property_map['description'] = lambda item: item.get('properties',{}).get('description',{}).get('value','')
-    property_map['pipeline'] = lambda item: item.get('properties',{}).get('pipeline',{}).get('value','')
-    property_map['contacts_cnt'] = lambda item: item.get('properties',{}).get('num_associated_contacts',{}).get('value','')
-    property_map['sales_activities_cnt'] = lambda item: item.get('properties',{}).get('num_notes',{}).get('value','')
-    property_map['times_contacted_cnt'] = lambda item: item.get('properties',{}).get('num_contacted_notes',{}).get('value','')
-    property_map['last_contacted_date'] = lambda item: convertTimestamp(item.get('properties',{}).get('notes_last_contacted',{}).get('value',None))
-    property_map['next_activity_date'] = lambda item: convertTimestamp(item.get('properties',{}).get('notes_next_activity_date',{}).get('value',None))
-    property_map['created_date'] = lambda item: convertTimestamp(item.get('properties',{}).get('createdate',{}).get('value',None))
-    property_map['updated_date'] = lambda item: convertTimestamp(item.get('properties',{}).get('notes_last_updated',{}).get('value',None))
-
-    # list of this function's properties we'd like to query
-    properties = list(property_map.keys())
-
-    # if we have a wildcard, get all the properties
-    if len(properties) == 1 and properties[0] == '*':
-        properties = list(property_map.keys())
-
-    # map the list of requested properties to hubspot properties; if none are
-    # available, include a blank placeholder
-    mapped_properties = [property_map.get(p, lambda item: '') for p in properties]
-
     # get the results
     result = []
-    result.append(properties)
 
     cursor_id = None
     page_idx, page_max = 0, 1000
     while True:
 
-        page_result = getTablePage(auth_token, mapped_properties, cursor_id)
+        page_result = getTablePage(auth_token, cursor_id)
         cursor_id = page_result['cursor']
         result += page_result['data']
 
@@ -199,10 +160,30 @@ def getTablePage(auth_token, properties, cursor_id):
 
         # get the data and the next cursor
         data = []
-        results = content.get('deals',[])
+        page = content.get('deals',[])
 
-        for result_info in results:
-            row = [p(result_info) or '' for p in properties]
+        for item in page:
+            row = OrderedDict()
+            row['portal_id'] = str(item.get('portalId',''))
+            row['deal_id'] = str(item.get('dealId',''))
+            row['deal_name'] = item.get('properties',{}).get('dealname',{}).get('value','')
+            row['deal_owner'] = str(item.get('properties',{}).get('hubspot_owner_id',{}).get('value',''))
+            row['deal_state'] = item.get('properties',{}).get('dealstage',{}).get('value','')
+            row['deal_type'] = item.get('properties',{}).get('dealtype',{}).get('value','')
+            row['amt'] = item.get('properties',{}).get('amount',{}).get('value','')
+            row['amt_home'] = item.get('properties',{}).get('amount_in_home_currency',{}).get('value','')
+            row['closed_lost_reason'] = item.get('properties',{}).get('closed_lost_reason',{}).get('value','')
+            row['closed_won_reason'] = item.get('properties',{}).get('closed_won_reason',{}).get('value','')
+            row['close_date'] = to_date(item.get('properties',{}).get('closedate',{}).get('value',None))
+            row['description'] = item.get('properties',{}).get('description',{}).get('value','')
+            row['pipeline'] = item.get('properties',{}).get('pipeline',{}).get('value','')
+            row['contacts_cnt'] = item.get('properties',{}).get('num_associated_contacts',{}).get('value','')
+            row['sales_activities_cnt'] = item.get('properties',{}).get('num_notes',{}).get('value','')
+            row['times_contacted_cnt'] = item.get('properties',{}).get('num_contacted_notes',{}).get('value','')
+            row['last_contacted_date'] = to_date(item.get('properties',{}).get('notes_last_contacted',{}).get('value',None))
+            row['next_activity_date'] = to_date(item.get('properties',{}).get('notes_next_activity_date',{}).get('value',None))
+            row['created_date'] = to_date(item.get('properties',{}).get('createdate',{}).get('value',None))
+            row['updated_date'] = to_date(item.get('properties',{}).get('notes_last_updated',{}).get('value',None))
             data.append(row)
 
         has_more = content.get('hasMore', False)
@@ -214,6 +195,11 @@ def getTablePage(auth_token, properties, cursor_id):
 
     except:
         return {"data": [], "cursor": None}
+
+def to_date(ts):
+    if ts is None or ts == '':
+        return ''
+    return datetime.utcfromtimestamp(int(ts)/1000).strftime('%Y-%m-%d %H:%M:%S')
 
 def to_string(value):
     if isinstance(value, (date, datetime)):

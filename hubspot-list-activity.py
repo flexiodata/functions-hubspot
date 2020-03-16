@@ -60,46 +60,6 @@ def flexio_handler(flex):
         flex.output.write([[""]])
         return
 
-    # map this function's property names to the API's property names
-    def getDeal(item):
-            ids = item.get('associations',{}).get('dealIds',[])
-            if len(ids) > 0:
-                return str(ids[0])
-            else:
-                return ''
-    def getCompany(item):
-            ids = item.get('associations',{}).get('companyIds',[])
-            if len(ids) > 0:
-                return str(ids[0])
-            else:
-                return ''
-    def convertTimestamp(ts):
-        if ts is None or ts == '':
-            return ''
-        return datetime.utcfromtimestamp(int(ts)/1000).strftime('%Y-%m-%d %H:%M:%S')
-    property_map = OrderedDict()
-    property_map['engagement_id'] = lambda item: str(item.get('engagement',{}).get('id',''))
-    property_map['portal_id'] = lambda item: str(item.get('engagement',{}).get('portalId',''))
-    property_map['deal_id'] = lambda item: getDeal(item)
-    property_map['company_id'] = lambda item: getCompany(item)
-    property_map['type'] = lambda item: item.get('engagement',{}).get('type','').lower()
-    property_map['active'] = lambda item: item.get('engagement',{}).get('active','')
-    property_map['created_at'] = lambda item: convertTimestamp(item.get('engagement',{}).get('createdAt',None))
-    property_map['last_updated'] = lambda item: convertTimestamp(item.get('engagement',{}).get('lastUpdated',None))
-    #property_map['content'] = lambda item: item.get('metadata',{}).get('body','')
-    #property_map['metadata'] = lambda item: json.dumps(item.get('metadata',{}))
-
-    # list of this function's properties we'd like to query
-    properties = list(property_map.keys())
-
-    # if we have a wildcard, get all the properties
-    if len(properties) == 1 and properties[0] == '*':
-        properties = list(property_map.keys())
-
-    # map the list of requested properties to hubspot properties; if none are
-    # available, include a blank placeholder
-    mapped_properties = [property_map.get(p, lambda item: '') for p in properties]
-
     # get the results
     result = []
     result.append(properties)
@@ -150,10 +110,30 @@ def getTablePage(auth_token, properties, cursor_id):
 
         # get the data and the next cursor
         data = []
-        results = content.get('results',[])
+        page = content.get('results',[])
 
-        for result_info in results:
-            row = [p(result_info) or '' for p in properties]
+        for item in page:
+
+            row = OrderedDict()
+            row['engagement_id'] = str(item.get('engagement',{}).get('id',''))
+            row['portal_id'] = str(item.get('engagement',{}).get('portalId',''))
+
+            row['deal_id'] = ''
+            ids = item.get('associations',{}).get('dealIds',[])
+            if len(ids) > 0:
+                row['deal_id'] = str(ids[0])
+
+            row['company_id'] = ''
+            ids = item.get('associations',{}).get('companyIds',[])
+            if len(ids) > 0:
+                row['company_id'] = str(ids[0])
+
+            row['type'] = item.get('engagement',{}).get('type','').lower()
+            row['active'] = item.get('engagement',{}).get('active','')
+            row['created_at'] = to_date(item.get('engagement',{}).get('createdAt',None))
+            row['last_updated'] = to_date(item.get('engagement',{}).get('lastUpdated',None))
+            #row['content'] = item.get('metadata',{}).get('body','')
+            #row['metadata'] = json.dumps(item.get('metadata',{}))
             data.append(row)
 
         has_more = content.get('hasMore', False)
@@ -165,6 +145,11 @@ def getTablePage(auth_token, properties, cursor_id):
 
     except:
         return {"data": [], "cursor": None}
+
+def to_date(ts):
+    if ts is None or ts == '':
+        return ''
+    return datetime.utcfromtimestamp(int(ts)/1000).strftime('%Y-%m-%d %H:%M:%S')
 
 def to_string(value):
     if isinstance(value, (date, datetime)):

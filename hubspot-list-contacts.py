@@ -79,33 +79,8 @@ def flexio_handler(flex):
         flex.output.write([[""]])
         return
 
-    # map this function's property names to the API's property names
-    property_map = OrderedDict()
-    property_map['first_name'] = 'firstname'
-    property_map['last_name'] = 'lastname'
-    property_map['email'] = 'email'
-    property_map['phone'] = 'phone'
-    property_map['phone_mobile'] = 'mobilephone'
-    property_map['job_title'] = 'jobtitle'
-    property_map['address'] = 'address'
-    property_map['city'] = 'city'
-    property_map['state'] = 'state'
-    property_map['zip'] = 'zip'
-    property_map['country'] = 'country'
-    property_map['linkedin_bio'] = 'linkedinbio'
-    property_map['created_date'] = 'createdate'
-    property_map['modified_date'] = 'lastmodifieddate'
-
-    # list of this function's properties we'd like to query
-    properties = list(property_map.keys())
-
-    # map the list of requested properties to hubspot properties; if none are
-    # available, include a blank placeholder
-    mapped_properties = [property_map.get(p,'') for p in properties]
-
     # get the results
     result = []
-    result.append(properties)
 
     cursor_id = None
     page_idx, page_max = 0, 1000
@@ -159,9 +134,24 @@ def getTablePage(auth_token, properties, cursor_id):
 
         # get the data and the next cursor
         data = []
-        contacts = content.get('contacts',[])
-        for item in contacts:
-            row = [item.get('properties').get(p,{}).get('value','') or '' for p in properties]
+        page = content.get('contacts',[])
+
+        for item in page:
+            row = OrderedDict()
+            row['first_name'] = item.get('properties').get('firstname',{}).get('value','')
+            row['last_name'] = item.get('properties').get('lastname',{}).get('value','')
+            row['email'] = item.get('properties').get('email',{}).get('value','')
+            row['phone'] = item.get('properties').get('phone',{}).get('value','')
+            row['phone_mobile'] = item.get('properties').get('mobilephone',{}).get('value','')
+            row['job_title'] = item.get('properties').get('jobtitle',{}).get('value','')
+            row['address'] = item.get('properties').get('address',{}).get('value','')
+            row['city'] = item.get('properties').get('city',{}).get('value','')
+            row['state'] = item.get('properties').get('state',{}).get('value','')
+            row['zip'] = item.get('properties').get('zip',{}).get('value','')
+            row['country'] = item.get('properties').get('country',{}).get('value','')
+            row['linkedin_bio'] = item.get('properties').get('linkedinbio',{}).get('value','')
+            row['created_date'] = to_date(item.get('properties').get('createdate',{}).get('value',''))
+            row['modified_date'] = to_date(item.get('properties').get('lastmodifieddate',{}).get('value',''))
             data.append(row)
 
         has_more = content.get('has-more', False)
@@ -173,6 +163,11 @@ def getTablePage(auth_token, properties, cursor_id):
 
     except:
         return {"data": [], "cursor": None}
+
+def to_date(ts):
+    if ts is None or ts == '':
+        return ''
+    return datetime.utcfromtimestamp(int(ts)/1000).strftime('%Y-%m-%d %H:%M:%S')
 
 def to_string(value):
     if isinstance(value, (date, datetime)):

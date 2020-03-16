@@ -81,7 +81,7 @@ def flexio_handler(flex):
     flex.output.content_type = "application/json"
     flex.output.write(result)
 
-def getTablePage(auth_token, properties, cursor_id):
+def getTablePage(auth_token, cursor_id):
 
     # see here for more info:
     # https://developers.hubspot.com/docs/methods/engagements/get-all-engagements

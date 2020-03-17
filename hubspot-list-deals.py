@@ -170,16 +170,16 @@ def getTablePage(auth_token, cursor_id):
             row['deal_owner'] = str(item.get('properties',{}).get('hubspot_owner_id',{}).get('value',''))
             row['deal_state'] = item.get('properties',{}).get('dealstage',{}).get('value','')
             row['deal_type'] = item.get('properties',{}).get('dealtype',{}).get('value','')
-            row['amt'] = item.get('properties',{}).get('amount',{}).get('value','')
-            row['amt_home'] = item.get('properties',{}).get('amount_in_home_currency',{}).get('value','')
+            row['amt'] = to_integer(item.get('properties',{}).get('amount',{}).get('value',''))
+            row['amt_home'] = to_integer(item.get('properties',{}).get('amount_in_home_currency',{}).get('value',''))
             row['closed_lost_reason'] = item.get('properties',{}).get('closed_lost_reason',{}).get('value','')
             row['closed_won_reason'] = item.get('properties',{}).get('closed_won_reason',{}).get('value','')
             row['close_date'] = to_date(item.get('properties',{}).get('closedate',{}).get('value',None))
             row['description'] = item.get('properties',{}).get('description',{}).get('value','')
             row['pipeline'] = item.get('properties',{}).get('pipeline',{}).get('value','')
-            row['contacts_cnt'] = item.get('properties',{}).get('num_associated_contacts',{}).get('value','')
-            row['sales_activities_cnt'] = item.get('properties',{}).get('num_notes',{}).get('value','')
-            row['times_contacted_cnt'] = item.get('properties',{}).get('num_contacted_notes',{}).get('value','')
+            row['contacts_cnt'] = to_integer(item.get('properties',{}).get('num_associated_contacts',{}).get('value',''))
+            row['sales_activities_cnt'] = to_integer(item.get('properties',{}).get('num_notes',{}).get('value',''))
+            row['times_contacted_cnt'] = to_integer(item.get('properties',{}).get('num_contacted_notes',{}).get('value',''))
             row['last_contacted_date'] = to_date(item.get('properties',{}).get('notes_last_contacted',{}).get('value',None))
             row['next_activity_date'] = to_date(item.get('properties',{}).get('notes_next_activity_date',{}).get('value',None))
             row['created_date'] = to_date(item.get('properties',{}).get('createdate',{}).get('value',None))
@@ -207,3 +207,10 @@ def to_string(value):
     if isinstance(value, (Decimal)):
         return str(value)
     return value
+
+def to_integer(value):
+    try:
+        return int(value)
+    except ValueError:
+        return ''
+

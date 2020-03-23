@@ -41,7 +41,7 @@
 #     description: The deal amount in home currency
 #   - name: forecast_close_date
 #     type: string
-#     description: The forecast close date; note: this is a placeholder for an example of a custom field
+#     description: The forecast close date; this is a placeholder for an example of a custom field
 #   - name: closed_lost_reason
 #     type: string
 #     description: The closed lost reason

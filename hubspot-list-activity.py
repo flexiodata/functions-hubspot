@@ -30,6 +30,15 @@
 #   - name: type
 #     type: string
 #     description: The type of the engagement
+#   - name: status
+#     type: string
+#     description: The status of a particular activity for the engagement
+#   - name: title
+#     type: string
+#     description: The title of a particular activity for the engagement
+#   - name: subject
+#     type: string
+#     description: The subject of a particular activity for the engagement
 #   - name: active
 #     type: string
 #     description: The status of the engagement; true if the engagement is active and false otherwise
@@ -128,11 +137,12 @@ def getTablePage(auth_token, cursor_id):
                 row['company_id'] = str(ids[0])
 
             row['type'] = item.get('engagement',{}).get('type','').lower()
+            row['status'] = item.get('metadata',{}).get('status','')
+            row['title'] = item.get('metadata',{}).get('title','')
+            row['subject'] = item.get('metadata',{}).get('subject','')
             row['active'] = item.get('engagement',{}).get('active','')
             row['created_at'] = to_date(item.get('engagement',{}).get('createdAt',None))
             row['last_updated'] = to_date(item.get('engagement',{}).get('lastUpdated',None))
-            #row['content'] = item.get('metadata',{}).get('body','')
-            #row['metadata'] = json.dumps(item.get('metadata',{}))
             data.append(row)
 
         has_more = content.get('hasMore', False)

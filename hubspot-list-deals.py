@@ -39,15 +39,15 @@
 #   - name: amt_home
 #     type: string
 #     description: The deal amount in home currency
-#   - name: forecast_close_date
-#     type: string
-#     description: The forecast close date; this is a placeholder for an example of a custom field
 #   - name: closed_lost_reason
 #     type: string
 #     description: The closed lost reason
 #   - name: closed_won_reason
 #     type: string
 #     description: The closed won reason
+#   - name: forecast_close_date
+#     type: string
+#     description: The forecasted close date; this is a placeholder for an example of a custom field
 #   - name: close_date
 #     type: string
 #     description: The close date
@@ -146,9 +146,9 @@ def getTablePage(auth_token, cursor_id):
             'dealtype',
             'amount',
             'amount_in_home_currency',
-            'forecast_close_date', # example of custom field
             'closed_lost_reason',
             'closed_won_reason',
+            'forecast_close_date', # example of custom field
             'closedate',
             'description',
             'pipeline',
@@ -181,9 +181,9 @@ def getTablePage(auth_token, cursor_id):
             row['deal_type'] = item.get('properties',{}).get('dealtype',{}).get('value','')
             row['amt'] = to_integer(item.get('properties',{}).get('amount',{}).get('value',''))
             row['amt_home'] = to_integer(item.get('properties',{}).get('amount_in_home_currency',{}).get('value',''))
-            row['forecast_close_date'] = to_date(item.get('properties',{}).get('closedate',{}).get('value',None)) # example of custom field
             row['closed_lost_reason'] = item.get('properties',{}).get('closed_lost_reason',{}).get('value','')
             row['closed_won_reason'] = item.get('properties',{}).get('closed_won_reason',{}).get('value','')
+            row['forecast_close_date'] = to_date(item.get('properties',{}).get('closedate',{}).get('value',None)) # example of custom field
             row['close_date'] = to_date(item.get('properties',{}).get('closedate',{}).get('value',None))
             row['description'] = item.get('properties',{}).get('description',{}).get('value','')
             row['pipeline'] = item.get('properties',{}).get('pipeline',{}).get('value','')

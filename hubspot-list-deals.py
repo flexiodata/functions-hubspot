@@ -39,6 +39,9 @@
 #   - name: amt_home
 #     type: string
 #     description: The deal amount in home currency
+#   - name: forecast_close_date
+#     type: string
+#     description: The forecast close date; note: this is a placeholder for an example of a custom field
 #   - name: closed_lost_reason
 #     type: string
 #     description: The closed lost reason
@@ -98,7 +101,7 @@ def flexio_handler(flex):
     result = []
 
     cursor_id = None
-    page_idx, page_max = 0, 1000
+    page_idx, page_max = 0, 5
     while True:
 
         page_result = getTablePage(auth_token, cursor_id)
@@ -117,7 +120,12 @@ def flexio_handler(flex):
 def getTablePage(auth_token, cursor_id):
 
     # see here for more info:
+    # https://knowledge.hubspot.com/deals/hubspots-default-deal-properties
     # https://developers.hubspot.com/docs/methods/deals/get-all-deals
+
+    # see here: to get all available deal properties:
+    # https://developers.hubspot.com/docs/methods/deals/get_deal_properties
+    # example: https://api.hubapi.com/properties/v1/deals/properties?hapikey=demo
 
     try:
 
@@ -138,6 +146,7 @@ def getTablePage(auth_token, cursor_id):
             'dealtype',
             'amount',
             'amount_in_home_currency',
+            'forecast_close_date', # example of custom field
             'closed_lost_reason',
             'closed_won_reason',
             'closedate',
@@ -172,6 +181,7 @@ def getTablePage(auth_token, cursor_id):
             row['deal_type'] = item.get('properties',{}).get('dealtype',{}).get('value','')
             row['amt'] = to_integer(item.get('properties',{}).get('amount',{}).get('value',''))
             row['amt_home'] = to_integer(item.get('properties',{}).get('amount_in_home_currency',{}).get('value',''))
+            row['forecast_close_date'] = to_date(item.get('properties',{}).get('closedate',{}).get('value',None)) # example of custom field
             row['closed_lost_reason'] = item.get('properties',{}).get('closed_lost_reason',{}).get('value','')
             row['closed_won_reason'] = item.get('properties',{}).get('closed_won_reason',{}).get('value','')
             row['close_date'] = to_date(item.get('properties',{}).get('closedate',{}).get('value',None))

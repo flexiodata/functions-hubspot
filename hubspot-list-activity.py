@@ -148,7 +148,7 @@ def getTablePage(auth_token, cursor_id):
             row['title'] = item.get('metadata',{}).get('title','')
             row['subject'] = item.get('metadata',{}).get('subject','')
             row['active'] = item.get('engagement',{}).get('active','')
-            row['created_by'] = item.get('engagement',{}).get('createdBy','')
+            row['created_by'] = str(item.get('engagement',{}).get('createdBy',''))
             row['created_at'] = to_date(item.get('engagement',{}).get('createdAt',None))
             row['last_updated'] = to_date(item.get('engagement',{}).get('lastUpdated',None))
             data.append(row)

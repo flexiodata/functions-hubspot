@@ -30,6 +30,9 @@
 #   - name: type
 #     type: string
 #     description: The type of the engagement
+#   - name: activity_type
+#     type: string
+#     description: The activity type associated with the engagement
 #   - name: status
 #     type: string
 #     description: The status of a particular activity for the engagement
@@ -42,6 +45,9 @@
 #   - name: active
 #     type: string
 #     description: The status of the engagement; true if the engagement is active and false otherwise
+#   - name: created_by
+#     type: string
+#     description: The id of the creator of the engagement
 #   - name: created_at
 #     type: string
 #     description: The creation date of the engagement
@@ -137,10 +143,12 @@ def getTablePage(auth_token, cursor_id):
                 row['company_id'] = str(ids[0])
 
             row['type'] = item.get('engagement',{}).get('type','').lower()
+            row['activity_type'] = item.get('engagement',{}).get('activityType','')
             row['status'] = item.get('metadata',{}).get('status','')
             row['title'] = item.get('metadata',{}).get('title','')
             row['subject'] = item.get('metadata',{}).get('subject','')
             row['active'] = item.get('engagement',{}).get('active','')
+            row['created_by'] = to_date(item.get('engagement',{}).get('createdBy',None))
             row['created_at'] = to_date(item.get('engagement',{}).get('createdAt',None))
             row['last_updated'] = to_date(item.get('engagement',{}).get('lastUpdated',None))
             data.append(row)

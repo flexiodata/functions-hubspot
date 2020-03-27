@@ -101,7 +101,7 @@ def flexio_handler(flex):
     result = []
 
     cursor_id = None
-    page_idx, page_max = 0, 5
+    page_idx, page_max = 0, 1000
     while True:
 
         page_result = getTablePage(auth_token, cursor_id)

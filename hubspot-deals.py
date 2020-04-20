@@ -1,9 +1,9 @@
 
 # ---
-# name: hubspot-list-deals
+# name: hubspot-deals
 # deployed: true
 # config: index
-# title: HubSpot Deals List
+# title: HubSpot Deals
 # description: Returns a list of deals from HubSpot
 # params:
 #   - name: properties

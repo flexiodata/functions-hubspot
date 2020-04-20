@@ -1,9 +1,9 @@
 
 # ---
-# name: hubspot-list-contacts
+# name: hubspot-contacts
 # deployed: true
 # config: index
-# title: HubSpot Contacts List
+# title: HubSpot Contacts
 # description: Returns a list of contacts from HubSpot.
 # params:
 #   - name: properties

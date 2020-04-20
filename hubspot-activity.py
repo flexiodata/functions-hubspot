@@ -1,9 +1,9 @@
 
 # ---
-# name: hubspot-list-activity
+# name: hubspot-activity
 # deployed: true
 # config: index
-# title: HubSpot Activity List
+# title: HubSpot Activity
 # description: Returns a list of activity from HubSpot.
 # params:
 #   - name: properties

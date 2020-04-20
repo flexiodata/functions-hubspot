@@ -7,7 +7,6 @@ functions:
   - path: hubspot-list-activity.py
   - path: hubspot-list-contacts.py
   - path: hubspot-list-deals.py
-  - path: hubspot-enrich-people.py
 prompts:
   - element: auth
     name: auth

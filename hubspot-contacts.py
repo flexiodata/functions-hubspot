@@ -64,105 +64,86 @@
 # ---
 
 import json
-import requests
 import urllib
+import requests
+from requests.adapters import HTTPAdapter
+from requests.packages.urllib3.util.retry import Retry
 from datetime import *
 from collections import OrderedDict
 
 # main function entry point
 def flexio_handler(flex):
 
+    flex.output.content_type = 'application/x-ndjson'
+    for item in get_data(flex.vars):
+        result = json.dumps(item, default=to_string) + "\n"
+        flex.output.write(result)
+
+def get_data(params):
+
     # get the api key from the variable input
-    auth_token = dict(flex.vars).get('hubspot_connection',{}).get('access_token')
-    if auth_token is None:
-        flex.output.content_type = "application/json"
-        flex.output.write([[""]])
-        return
-
-    # get the results
-    result = []
-
-    cursor_id = None
-    page_idx, page_max = 0, 1000
-    while True:
-
-        page_result = getTablePage(auth_token, cursor_id)
-        cursor_id = page_result['cursor']
-        result += page_result['data']
-
-        page_idx = page_idx + 1
-        if page_idx >= page_max or cursor_id is None:
-            break
-
-    # return the results
-    result = json.dumps(result, default=to_string)
-    flex.output.content_type = "application/json"
-    flex.output.write(result)
-
-def getTablePage(auth_token, cursor_id):
+    auth_token = dict(params).get('hubspot_connection',{}).get('access_token')
 
     # see here for more info:
     # https://developers.hubspot.com/docs/methods/contacts/get_contacts
     # note: pagination mechanism different from other api calls; compare activity/deal pagination
 
-    try:
+    headers = {
+        'Authorization': 'Bearer ' + auth_token,
+    }
+    url = 'https://api.hubapi.com/contacts/v1/lists/all/contacts/all'
 
-        # make the request
-        headers = {
-            'Authorization': 'Bearer ' + auth_token,
-        }
-        url_query_params = {
-            'count': 100,
-            'property': ''
-        }
-        if cursor_id is not None:
-            url_query_params['vidOffset'] = cursor_id
+    request_properties = [
+        'firstname','lastname','email','phone','mobilephone','jobtitle', 'address',
+        'city','state','zip','country','linkedinbio','createdate', 'lastmodifieddate'
+    ]
 
-        request_properties = [
-            'firstname','lastname','email','phone','mobilephone','jobtitle', 'address',
-            'city','state','zip','country','linkedinbio','createdate', 'lastmodifieddate'
-        ]
+    page_size = 100
+    page_cursor_id = None
+    while True:
 
+        url_query_params = {'count': page_size}
+        if page_cursor_id is not None:
+            url_query_params['vidOffset'] = page_cursor_id
         url_query_str = urllib.parse.urlencode(url_query_params)
-        url_query_str += "&property=" + "&property=".join(request_properties)
-        url = 'https://api.hubapi.com/contacts/v1/lists/all/contacts/all?' + url_query_str
+        url_request_properties = "&property=" + "&property=".join(request_properties)
 
-        # get the response
-        response = requests.get(url, headers=headers)
+        page_url = url + '?' + url_query_str + url_request_properties
+        response = requests_retry_session().get(page_url, headers=headers)
         response.raise_for_status()
         content = response.json()
+        data = content.get('contacts',[])
 
-        # get the data and the next cursor
-        data = []
-        page = content.get('contacts',[])
+        if len(data) == 0: # sanity check in case there's an issue with cursor
+            break
 
-        for item in page:
-            row = OrderedDict()
-            row['first_name'] = item.get('properties').get('firstname',{}).get('value','')
-            row['last_name'] = item.get('properties').get('lastname',{}).get('value','')
-            row['email'] = item.get('properties').get('email',{}).get('value','')
-            row['phone'] = item.get('properties').get('phone',{}).get('value','')
-            row['phone_mobile'] = item.get('properties').get('mobilephone',{}).get('value','')
-            row['job_title'] = item.get('properties').get('jobtitle',{}).get('value','')
-            row['address'] = item.get('properties').get('address',{}).get('value','')
-            row['city'] = item.get('properties').get('city',{}).get('value','')
-            row['state'] = item.get('properties').get('state',{}).get('value','')
-            row['zip'] = item.get('properties').get('zip',{}).get('value','')
-            row['country'] = item.get('properties').get('country',{}).get('value','')
-            row['linkedin_bio'] = item.get('properties').get('linkedinbio',{}).get('value','')
-            row['created_date'] = to_date(item.get('properties').get('createdate',{}).get('value',''))
-            row['modified_date'] = to_date(item.get('properties').get('lastmodifieddate',{}).get('value',''))
-            data.append(row)
+        for item in data:
+            yield get_item_info(item)
 
         has_more = content.get('has-more', False)
-        next_cursor_id = content.get('vid-offset')
         if has_more is False:
-            next_cursor_id = None
+            break
 
-        return {"data": data, "cursor": next_cursor_id}
+        page_cursor_id = content.get('vid-offset')
 
-    except:
-        return {"data": [], "cursor": None}
+def requests_retry_session(
+    retries=3,
+    backoff_factor=0.3,
+    status_forcelist=(500, 502, 504),
+    session=None,
+):
+    session = session or requests.Session()
+    retry = Retry(
+        total=retries,
+        read=retries,
+        connect=retries,
+        backoff_factor=backoff_factor,
+        status_forcelist=status_forcelist,
+    )
+    adapter = HTTPAdapter(max_retries=retry)
+    session.mount('http://', adapter)
+    session.mount('https://', adapter)
+    return session
 
 def to_date(ts):
     if ts is None or ts == '':
@@ -175,3 +156,24 @@ def to_string(value):
     if isinstance(value, (Decimal)):
         return str(value)
     return value
+
+def get_item_info(item):
+
+    info = OrderedDict()
+
+    info['first_name'] = item.get('properties').get('firstname',{}).get('value','')
+    info['last_name'] = item.get('properties').get('lastname',{}).get('value','')
+    info['email'] = item.get('properties').get('email',{}).get('value','')
+    info['phone'] = item.get('properties').get('phone',{}).get('value','')
+    info['phone_mobile'] = item.get('properties').get('mobilephone',{}).get('value','')
+    info['job_title'] = item.get('properties').get('jobtitle',{}).get('value','')
+    info['address'] = item.get('properties').get('address',{}).get('value','')
+    info['city'] = item.get('properties').get('city',{}).get('value','')
+    info['state'] = item.get('properties').get('state',{}).get('value','')
+    info['zip'] = item.get('properties').get('zip',{}).get('value','')
+    info['country'] = item.get('properties').get('country',{}).get('value','')
+    info['linkedin_bio'] = item.get('properties').get('linkedinbio',{}).get('value','')
+    info['created_date'] = to_date(item.get('properties').get('createdate',{}).get('value',''))
+    info['modified_date'] = to_date(item.get('properties').get('lastmodifieddate',{}).get('value',''))
+
+    return info

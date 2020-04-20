@@ -60,108 +60,81 @@
 # ---
 
 import json
-import requests
 import urllib
+import requests
+from requests.adapters import HTTPAdapter
+from requests.packages.urllib3.util.retry import Retry
 from datetime import *
 from collections import OrderedDict
 
 # main function entry point
 def flexio_handler(flex):
 
+    flex.output.content_type = 'application/x-ndjson'
+    for item in get_data(flex.vars):
+        result = json.dumps(item, default=to_string) + "\n"
+        flex.output.write(result)
+
+def get_data(params):
+
     # get the api key from the variable input
-    auth_token = dict(flex.vars).get('hubspot_connection',{}).get('access_token')
-    if auth_token is None:
-        flex.output.content_type = "application/json"
-        flex.output.write([[""]])
-        return
-
-    # get the results
-    result = []
-
-    cursor_id = None
-    page_idx, page_max = 0, 1000
-    while True:
-
-        page_result = getTablePage(auth_token, cursor_id)
-        cursor_id = page_result['cursor']
-        result += page_result['data']
-
-        page_idx = page_idx + 1
-        if page_idx >= page_max or cursor_id is None:
-            break
-
-    # return the results
-    result = json.dumps(result, default=to_string)
-    flex.output.content_type = "application/json"
-    flex.output.write(result)
-
-def getTablePage(auth_token, cursor_id):
+    auth_token = dict(params).get('hubspot_connection',{}).get('access_token')
 
     # see here for more info:
     # https://developers.hubspot.com/docs/methods/engagements/get-all-engagements
     # https://developers.hubspot.com/docs/methods/engagements/engagements-overview
     # note: pagination mechanism different from other api calls; compare deal pagination
 
-    try:
+    headers = {
+        'Authorization': 'Bearer ' + auth_token,
+    }
+    url = 'https://api.hubapi.com/engagements/v1/engagements/paged'
 
-        # make the request
-        headers = {
-            'Authorization': 'Bearer ' + auth_token,
-        }
-        url_query_params = {
-            'limit': 250
-        }
-        if cursor_id is not None:
-            url_query_params['offset'] = cursor_id
+    page_size = 250
+    page_cursor_id = None
+    while True:
 
+        url_query_params = {'limit': page_size}
+        if page_cursor_id is not None:
+            url_query_params['offset'] = page_cursor_id
         url_query_str = urllib.parse.urlencode(url_query_params)
-        url = 'https://api.hubapi.com/engagements/v1/engagements/paged?' + url_query_str
 
-        # get the response
-        response = requests.get(url, headers=headers)
+        page_url = url + '?' + url_query_str
+        response = requests_retry_session().get(page_url, headers=headers)
         response.raise_for_status()
         content = response.json()
+        data = content.get('results',[])
 
-        # get the data and the next cursor
-        data = []
-        page = content.get('results',[])
+        if len(data) == 0: # sanity check in case there's an issue with cursor
+            break
 
-        for item in page:
-
-            row = OrderedDict()
-            row['engagement_id'] = str(item.get('engagement',{}).get('id',''))
-            row['portal_id'] = str(item.get('engagement',{}).get('portalId',''))
-
-            row['deal_id'] = ''
-            ids = item.get('associations',{}).get('dealIds',[])
-            if len(ids) > 0:
-                row['deal_id'] = str(ids[0])
-
-            row['company_id'] = ''
-            ids = item.get('associations',{}).get('companyIds',[])
-            if len(ids) > 0:
-                row['company_id'] = str(ids[0])
-
-            row['type'] = item.get('engagement',{}).get('type','').lower()
-            row['activity_type'] = item.get('engagement',{}).get('activityType','')
-            row['status'] = item.get('metadata',{}).get('status','')
-            row['title'] = item.get('metadata',{}).get('title','')
-            row['subject'] = item.get('metadata',{}).get('subject','')
-            row['active'] = item.get('engagement',{}).get('active','')
-            row['created_by'] = str(item.get('engagement',{}).get('createdBy',''))
-            row['created_at'] = to_date(item.get('engagement',{}).get('createdAt',None))
-            row['last_updated'] = to_date(item.get('engagement',{}).get('lastUpdated',None))
-            data.append(row)
+        for item in data:
+            yield get_item_info(item)
 
         has_more = content.get('hasMore', False)
-        next_cursor_id = content.get('offset')
         if has_more is False:
-            next_cursor_id = None
+            break
 
-        return {"data": data, "cursor": next_cursor_id}
+        page_cursor_id = content.get('offset')
 
-    except:
-        return {"data": [], "cursor": None}
+def requests_retry_session(
+    retries=3,
+    backoff_factor=0.3,
+    status_forcelist=(500, 502, 504),
+    session=None,
+):
+    session = session or requests.Session()
+    retry = Retry(
+        total=retries,
+        read=retries,
+        connect=retries,
+        backoff_factor=backoff_factor,
+        status_forcelist=status_forcelist,
+    )
+    adapter = HTTPAdapter(max_retries=retry)
+    session.mount('http://', adapter)
+    session.mount('https://', adapter)
+    return session
 
 def to_date(ts):
     if ts is None or ts == '':
@@ -174,3 +147,29 @@ def to_string(value):
     if isinstance(value, (Decimal)):
         return str(value)
     return value
+
+def get_item_info(item):
+
+    info = OrderedDict()
+
+    info['engagement_id'] = str(item.get('engagement',{}).get('id',''))
+    info['portal_id'] = str(item.get('engagement',{}).get('portalId',''))
+    info['deal_id'] = ''
+    ids = item.get('associations',{}).get('dealIds',[])
+    if len(ids) > 0:
+        info['deal_id'] = str(ids[0])
+    info['company_id'] = ''
+    ids = item.get('associations',{}).get('companyIds',[])
+    if len(ids) > 0:
+        info['company_id'] = str(ids[0])
+    info['type'] = item.get('engagement',{}).get('type','').lower()
+    info['activity_type'] = item.get('engagement',{}).get('activityType','')
+    info['status'] = item.get('metadata',{}).get('status','')
+    info['title'] = item.get('metadata',{}).get('title','')
+    info['subject'] = item.get('metadata',{}).get('subject','')
+    info['active'] = item.get('engagement',{}).get('active','')
+    info['created_by'] = str(item.get('engagement',{}).get('createdBy',''))
+    info['created_at'] = to_date(item.get('engagement',{}).get('createdAt',None))
+    info['last_updated'] = to_date(item.get('engagement',{}).get('lastUpdated',None))
+
+    return info

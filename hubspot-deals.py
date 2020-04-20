@@ -82,42 +82,25 @@
 # ---
 
 import json
-import requests
 import urllib
+import requests
+from requests.adapters import HTTPAdapter
+from requests.packages.urllib3.util.retry import Retry
 from datetime import *
 from collections import OrderedDict
 
 # main function entry point
 def flexio_handler(flex):
 
+    flex.output.content_type = 'application/x-ndjson'
+    for item in get_data(flex.vars):
+        result = json.dumps(item, default=to_string) + "\n"
+        flex.output.write(result)
+
+def get_data(params):
+
     # get the api key from the variable input
-    auth_token = dict(flex.vars).get('hubspot_connection',{}).get('access_token')
-    if auth_token is None:
-        flex.output.content_type = "application/json"
-        flex.output.write([[""]])
-        return
-
-    # get the results
-    result = []
-
-    cursor_id = None
-    page_idx, page_max = 0, 1000
-    while True:
-
-        page_result = getTablePage(auth_token, cursor_id)
-        cursor_id = page_result['cursor']
-        result += page_result['data']
-
-        page_idx = page_idx + 1
-        if page_idx >= page_max or cursor_id is None:
-            break
-
-    # return the results
-    result = json.dumps(result, default=to_string)
-    flex.output.content_type = "application/json"
-    flex.output.write(result)
-
-def getTablePage(auth_token, cursor_id):
+    auth_token = dict(params).get('hubspot_connection',{}).get('access_token')
 
     # see here for more info:
     # https://knowledge.hubspot.com/deals/hubspots-default-deal-properties
@@ -127,84 +110,65 @@ def getTablePage(auth_token, cursor_id):
     # https://developers.hubspot.com/docs/methods/deals/get_deal_properties
     # example: https://api.hubapi.com/properties/v1/deals/properties?hapikey=demo
 
-    try:
+    headers = {
+        'Authorization': 'Bearer ' + auth_token,
+    }
+    url = 'https://api.hubapi.com/deals/v1/deal/paged'
 
-        headers = {
-            'Authorization': 'Bearer ' + auth_token,
-        }
-        url_query_params = {
-            'limit': 250
-        }
-        if cursor_id is not None:
-            url_query_params['offset'] = cursor_id
+    request_properties = [
+        'dealname','hubspot_owner_id','dealstage','dealtype','amount','amount_in_home_currency',
+        'closed_lost_reason','closed_won_reason','forecast_close_date', # forecast_close_date is example of custom field
+        'closedate','description','pipeline','num_associated_contacts','num_notes',
+        'num_contacted_notes','notes_last_contacted','notes_next_activity_date','createdate',
+        'notes_last_updated'
+    ]
 
+    page_size = 250
+    page_cursor_id = None
+    while True:
+
+        url_query_params = {'limit': page_size}
+        if page_cursor_id is not None:
+            url_query_params['offset'] = page_cursor_id
         url_query_str = urllib.parse.urlencode(url_query_params)
-        properties_str = "&properties=" + "&properties=".join([
-            'dealname',
-            'hubspot_owner_id',
-            'dealstage',
-            'dealtype',
-            'amount',
-            'amount_in_home_currency',
-            'closed_lost_reason',
-            'closed_won_reason',
-            'forecast_close_date', # example of custom field
-            'closedate',
-            'description',
-            'pipeline',
-            'num_associated_contacts',
-            'num_notes',
-            'num_contacted_notes',
-            'notes_last_contacted',
-            'notes_next_activity_date',
-            'createdate',
-            'notes_last_updated'
-            ])
-        url = 'https://api.hubapi.com/deals/v1/deal/paged?' + url_query_str + properties_str
+        url_request_properties = "&properties=" + "&properties=".join(request_properties)
 
-        # get the response
-        response = requests.get(url, headers=headers)
+        page_url = url + '?' + url_query_str + url_request_properties
+        response = requests_retry_session().get(page_url, headers=headers)
         response.raise_for_status()
         content = response.json()
+        data = content.get('deals',[])
 
-        # get the data and the next cursor
-        data = []
-        page = content.get('deals',[])
+        if len(data) == 0 :# sanity check in case there's an issue with cursor
+            break
 
-        for item in page:
-            row = OrderedDict()
-            row['portal_id'] = str(item.get('portalId',''))
-            row['deal_id'] = str(item.get('dealId',''))
-            row['deal_name'] = item.get('properties',{}).get('dealname',{}).get('value','')
-            row['deal_owner'] = str(item.get('properties',{}).get('hubspot_owner_id',{}).get('value',''))
-            row['deal_state'] = item.get('properties',{}).get('dealstage',{}).get('value','')
-            row['deal_type'] = item.get('properties',{}).get('dealtype',{}).get('value','')
-            row['amt'] = to_integer(item.get('properties',{}).get('amount',{}).get('value',''))
-            row['amt_home'] = to_integer(item.get('properties',{}).get('amount_in_home_currency',{}).get('value',''))
-            row['closed_lost_reason'] = item.get('properties',{}).get('closed_lost_reason',{}).get('value','')
-            row['closed_won_reason'] = item.get('properties',{}).get('closed_won_reason',{}).get('value','')
-            row['forecast_close_date'] = to_date(item.get('properties',{}).get('closedate',{}).get('value',None)) # example of custom field
-            row['close_date'] = to_date(item.get('properties',{}).get('closedate',{}).get('value',None))
-            row['description'] = item.get('properties',{}).get('description',{}).get('value','')
-            row['pipeline'] = item.get('properties',{}).get('pipeline',{}).get('value','')
-            row['contacts_cnt'] = to_integer(item.get('properties',{}).get('num_associated_contacts',{}).get('value',''))
-            row['sales_activities_cnt'] = to_integer(item.get('properties',{}).get('num_notes',{}).get('value',''))
-            row['times_contacted_cnt'] = to_integer(item.get('properties',{}).get('num_contacted_notes',{}).get('value',''))
-            row['last_contacted_date'] = to_date(item.get('properties',{}).get('notes_last_contacted',{}).get('value',None))
-            row['next_activity_date'] = to_date(item.get('properties',{}).get('notes_next_activity_date',{}).get('value',None))
-            row['created_date'] = to_date(item.get('properties',{}).get('createdate',{}).get('value',None))
-            row['updated_date'] = to_date(item.get('properties',{}).get('notes_last_updated',{}).get('value',None))
-            data.append(row)
+        for item in data:
+            yield get_item_info(item)
 
         has_more = content.get('hasMore', False)
-        next_cursor_id = content.get('offset')
         if has_more is False:
-            next_cursor_id = None
+            break
 
-        return {"data": data, "cursor": next_cursor_id}
+        page_cursor_id = content.get('offset')
 
-    except:
-        return {"data": [], "cursor": None}
+def requests_retry_session(
+    retries=3,
+    backoff_factor=0.3,
+    status_forcelist=(500, 502, 504),
+    session=None,
+):
+    session = session or requests.Session()
+    retry = Retry(
+        total=retries,
+        read=retries,
+        connect=retries,
+        backoff_factor=backoff_factor,
+        status_forcelist=status_forcelist,
+    )
+    adapter = HTTPAdapter(max_retries=retry)
+    session.mount('http://', adapter)
+    session.mount('https://', adapter)
+    return session
 
 def to_date(ts):
     if ts is None or ts == '':
@@ -224,3 +188,30 @@ def to_integer(value):
     except ValueError:
         return ''
 
+def get_item_info(item):
+
+    info = OrderedDict()
+
+    info['portal_id'] = str(item.get('portalId',''))
+    info['deal_id'] = str(item.get('dealId',''))
+    info['deal_name'] = item.get('properties',{}).get('dealname',{}).get('value','')
+    info['deal_owner'] = str(item.get('properties',{}).get('hubspot_owner_id',{}).get('value',''))
+    info['deal_state'] = item.get('properties',{}).get('dealstage',{}).get('value','')
+    info['deal_type'] = item.get('properties',{}).get('dealtype',{}).get('value','')
+    info['amt'] = to_integer(item.get('properties',{}).get('amount',{}).get('value',''))
+    info['amt_home'] = to_integer(item.get('properties',{}).get('amount_in_home_currency',{}).get('value',''))
+    info['closed_lost_reason'] = item.get('properties',{}).get('closed_lost_reason',{}).get('value','')
+    info['closed_won_reason'] = item.get('properties',{}).get('closed_won_reason',{}).get('value','')
+    info['forecast_close_date'] = to_date(item.get('properties',{}).get('closedate',{}).get('value',None)) # example of custom field
+    info['close_date'] = to_date(item.get('properties',{}).get('closedate',{}).get('value',None))
+    info['description'] = item.get('properties',{}).get('description',{}).get('value','')
+    info['pipeline'] = item.get('properties',{}).get('pipeline',{}).get('value','')
+    info['contacts_cnt'] = to_integer(item.get('properties',{}).get('num_associated_contacts',{}).get('value',''))
+    info['sales_activities_cnt'] = to_integer(item.get('properties',{}).get('num_notes',{}).get('value',''))
+    info['times_contacted_cnt'] = to_integer(item.get('properties',{}).get('num_contacted_notes',{}).get('value',''))
+    info['last_contacted_date'] = to_date(item.get('properties',{}).get('notes_last_contacted',{}).get('value',None))
+    info['next_activity_date'] = to_date(item.get('properties',{}).get('notes_next_activity_date',{}).get('value',None))
+    info['created_date'] = to_date(item.get('properties',{}).get('createdate',{}).get('value',None))
+    info['updated_date'] = to_date(item.get('properties',{}).get('notes_last_updated',{}).get('value',None))
+
+    return info

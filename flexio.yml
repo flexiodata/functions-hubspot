@@ -4,9 +4,9 @@ image:
   src: https://static.flex.io/assets/logos2/hubspot.png
   alt: HubSpot logo
 functions:
-  - path: hubspot-list-activity.py
-  - path: hubspot-list-contacts.py
-  - path: hubspot-list-deals.py
+  - path: hubspot-activity.py
+  - path: hubspot-contacts.py
+  - path: hubspot-deals.py
 prompts:
   - element: auth
     name: auth

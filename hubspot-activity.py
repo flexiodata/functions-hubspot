@@ -54,7 +54,7 @@
 #   - name: created_at
 #     type: string
 #     description: The creation date of the engagement
-#   - name: last_updated
+#   - name: updated_at
 #     type: string
 #     description: The date the engagement was last updated
 # examples:
@@ -174,6 +174,6 @@ def get_item_info(item):
     info['active'] = item.get('engagement',{}).get('active','')
     info['created_by'] = str(item.get('engagement',{}).get('createdBy',''))
     info['created_at'] = to_date(item.get('engagement',{}).get('createdAt',None))
-    info['last_updated'] = to_date(item.get('engagement',{}).get('lastUpdated',None))
+    info['updated_at'] = to_date(item.get('engagement',{}).get('lastUpdated',None))
 
     return info

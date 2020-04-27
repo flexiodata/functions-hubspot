@@ -33,6 +33,9 @@
 #   - name: activity_type
 #     type: string
 #     description: The activity type associated with the engagement
+#   - name: activity_date
+#     type: string
+#     description: The date of the engagement
 #   - name: status
 #     type: string
 #     description: The status of a particular activity for the engagement
@@ -164,6 +167,7 @@ def get_item_info(item):
         info['company_id'] = str(ids[0])
     info['type'] = item.get('engagement',{}).get('type','').lower()
     info['activity_type'] = item.get('engagement',{}).get('activityType','')
+    info['activity_date'] = to_date(item.get('engagement',{}).get('timestamp',None))
     info['status'] = item.get('metadata',{}).get('status','')
     info['title'] = item.get('metadata',{}).get('title','')
     info['subject'] = item.get('metadata',{}).get('subject','')

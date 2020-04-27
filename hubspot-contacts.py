@@ -51,10 +51,10 @@
 #   - name: linkedin_bio
 #     type: string
 #     description: The biography of the contact on LinkedIn
-#   - name: created_date
+#   - name: created_at
 #     type: string
 #     description: The date the record for this contact was created
-#   - name: modified_date
+#   - name: updated_at
 #     type: string
 #     description: The last date the record for this contact was modified
 # examples:
@@ -173,7 +173,7 @@ def get_item_info(item):
     info['zip'] = item.get('properties').get('zip',{}).get('value','')
     info['country'] = item.get('properties').get('country',{}).get('value','')
     info['linkedin_bio'] = item.get('properties').get('linkedinbio',{}).get('value','')
-    info['created_date'] = to_date(item.get('properties').get('createdate',{}).get('value',''))
-    info['modified_date'] = to_date(item.get('properties').get('lastmodifieddate',{}).get('value',''))
+    info['created_at'] = to_date(item.get('properties').get('createdate',{}).get('value',''))
+    info['updated_at'] = to_date(item.get('properties').get('lastmodifieddate',{}).get('value',''))
 
     return info

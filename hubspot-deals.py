@@ -75,7 +75,7 @@
 #   - name: notes_next_activity_date
 #     type: string
 #     description: The next notes activity date
-#   - name: create_date
+#   - name: created_at
 #     type: string
 #     description: The date the deal was added to the system
 # examples:
@@ -212,6 +212,6 @@ def get_item_info(item):
     info['notes_last_contacted'] = to_date(item.get('properties',{}).get('notes_last_contacted',{}).get('value',None))
     info['notes_last_updated'] = to_date(item.get('properties',{}).get('notes_last_updated',{}).get('value',None))
     info['notes_next_activity_date'] = to_date(item.get('properties',{}).get('notes_next_activity_date',{}).get('value',None))
-    info['create_date'] = to_date(item.get('properties',{}).get('createdate',{}).get('value',None))
+    info['created_at'] = to_date(item.get('properties',{}).get('createdate',{}).get('value',None))
 
     return info

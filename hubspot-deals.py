@@ -27,16 +27,16 @@
 #   - name: deal_owner
 #     type: string
 #     description: The deal owner
-#   - name: deal_state
+#   - name: deal_stage
 #     type: string
 #     description: The deal stage
 #   - name: deal_type
 #     type: string
 #     description: The deal type
-#   - name: amt
+#   - name: amount
 #     type: string
 #     description: The deal mount
-#   - name: amt_home
+#   - name: amount_in_home_currency
 #     type: string
 #     description: The deal amount in home currency
 #   - name: closed_lost_reason
@@ -57,27 +57,27 @@
 #   - name: pipeline
 #     type: string
 #     description: The pipeline
-#   - name: contacts_cnt
+#   - name: num_notes
 #     type: string
-#     description: The number of contacts
-#   - name: sales_activities_cnt
+#     description: The number of notes
+#   - name: num_associated_contacts
 #     type: string
-#     description: The number of sales activities
-#   - name: times_contacted_cnt
+#     description: The number of associated contacts
+#   - name: num_contacted_notes
 #     type: string
-#     description: The number of times contacted
-#   - name: last_contacted_date
+#     description: The number of contact-related notes
+#   - name: notes_last_contacted
 #     type: string
-#     description: The last contacted date
-#   - name: next_activity_date
+#     description: The last contacted date associated with the notes
+#   - name: notes_last_updated
 #     type: string
-#     description: The next activity date
-#   - name: created_date
+#     description: The date the notes were last updated
+#   - name: notes_next_activity_date
 #     type: string
-#     description: The created date
-#   - name: updated_date
+#     description: The next notes activity date
+#   - name: create_date
 #     type: string
-#     description: The last activity date
+#     description: The date the deal was added to the system
 # examples:
 # ---
 
@@ -196,22 +196,22 @@ def get_item_info(item):
     info['deal_id'] = str(item.get('dealId',''))
     info['deal_name'] = item.get('properties',{}).get('dealname',{}).get('value','')
     info['deal_owner'] = str(item.get('properties',{}).get('hubspot_owner_id',{}).get('value',''))
-    info['deal_state'] = item.get('properties',{}).get('dealstage',{}).get('value','')
+    info['deal_stage'] = item.get('properties',{}).get('dealstage',{}).get('value','')
     info['deal_type'] = item.get('properties',{}).get('dealtype',{}).get('value','')
-    info['amt'] = to_integer(item.get('properties',{}).get('amount',{}).get('value',''))
-    info['amt_home'] = to_integer(item.get('properties',{}).get('amount_in_home_currency',{}).get('value',''))
+    info['amount'] = to_integer(item.get('properties',{}).get('amount',{}).get('value',''))
+    info['amount_in_home_currency'] = to_integer(item.get('properties',{}).get('amount_in_home_currency',{}).get('value',''))
     info['closed_lost_reason'] = item.get('properties',{}).get('closed_lost_reason',{}).get('value','')
     info['closed_won_reason'] = item.get('properties',{}).get('closed_won_reason',{}).get('value','')
-    info['forecast_close_date'] = to_date(item.get('properties',{}).get('closedate',{}).get('value',None)) # example of custom field
+    info['forecast_close_date'] = to_date(item.get('properties',{}).get('forecast_close_date',{}).get('value',None)) # example of custom field
     info['close_date'] = to_date(item.get('properties',{}).get('closedate',{}).get('value',None))
     info['description'] = item.get('properties',{}).get('description',{}).get('value','')
     info['pipeline'] = item.get('properties',{}).get('pipeline',{}).get('value','')
-    info['contacts_cnt'] = to_integer(item.get('properties',{}).get('num_associated_contacts',{}).get('value',''))
-    info['sales_activities_cnt'] = to_integer(item.get('properties',{}).get('num_notes',{}).get('value',''))
-    info['times_contacted_cnt'] = to_integer(item.get('properties',{}).get('num_contacted_notes',{}).get('value',''))
-    info['last_contacted_date'] = to_date(item.get('properties',{}).get('notes_last_contacted',{}).get('value',None))
-    info['next_activity_date'] = to_date(item.get('properties',{}).get('notes_next_activity_date',{}).get('value',None))
-    info['created_date'] = to_date(item.get('properties',{}).get('createdate',{}).get('value',None))
-    info['updated_date'] = to_date(item.get('properties',{}).get('notes_last_updated',{}).get('value',None))
+    info['num_notes'] = to_integer(item.get('properties',{}).get('num_notes',{}).get('value',''))
+    info['num_associated_contacts'] = to_integer(item.get('properties',{}).get('num_associated_contacts',{}).get('value',''))
+    info['num_contacted_notes'] = to_integer(item.get('properties',{}).get('num_contacted_notes',{}).get('value',''))
+    info['notes_last_contacted'] = to_date(item.get('properties',{}).get('notes_last_contacted',{}).get('value',None))
+    info['notes_last_updated'] = to_date(item.get('properties',{}).get('notes_last_updated',{}).get('value',None))
+    info['notes_next_activity_date'] = to_date(item.get('properties',{}).get('notes_next_activity_date',{}).get('value',None))
+    info['create_date'] = to_date(item.get('properties',{}).get('createdate',{}).get('value',None))
 
     return info

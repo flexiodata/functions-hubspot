@@ -74,9 +74,8 @@ from collections import OrderedDict
 def flexio_handler(flex):
 
     flex.output.content_type = 'application/x-ndjson'
-    for item in get_data(flex.vars):
-        result = json.dumps(item, default=to_string) + "\n"
-        flex.output.write(result)
+    for data in get_data(flex.vars):
+        flex.output.write(data)
 
 def get_data(params):
 
@@ -111,8 +110,11 @@ def get_data(params):
         if len(data) == 0: # sanity check in case there's an issue with cursor
             break
 
+        buffer = ''
         for item in data:
-            yield get_item_info(item)
+            item = get_item_info(item)
+            buffer = buffer + json.dumps(item, default=to_string) + "\n"
+        yield buffer
 
         has_more = content.get('hasMore', False)
         if has_more is False:

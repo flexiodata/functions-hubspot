@@ -18,15 +18,21 @@
 #   - name: portal_id
 #     type: integer
 #     description: The portal id for the deal
+#   - name: owner_id
+#     type: integer
+#     description: The id of the owner of the deal
+#   - name: owner_first_name
+#     type: string
+#     description: The first name of the owner of the deal
+#   - name: owner_last_name
+#     type: string
+#     description: The last name of the owner of the deal
 #   - name: deal_id
 #     type: integer
 #     description: The deal id for the deal
 #   - name: deal_name
 #     type: string
 #     description: The deal name
-#   - name: deal_owner
-#     type: integer
-#     description: The deal owner
 #   - name: deal_stage_id
 #     type: integer
 #     description: The deal stage id
@@ -113,12 +119,33 @@ def get_data(params):
     # https://developers.hubspot.com/docs/methods/deals/get_deal_properties
     # example: https://api.hubapi.com/properties/v1/deals/properties?hapikey=demo
 
+    # see here to get owner information:
+    # https://developers.hubspot.com/docs/methods/owners/owners_overview
+    # https://developers.hubspot.com/docs/methods/owners/get_owners
+
     # see here to get deal stage information:
     # https://developers.hubspot.com/docs/methods/pipelines/pipelines_overview
     # https://developers.hubspot.com/docs/methods/pipelines/get_pipelines_for_object_type
 
+    # STEP 1: get the owner info
+    headers = {
+        'Authorization': 'Bearer ' + auth_token,
+    }
+    url = 'https://api.hubapi.com/owners/v2/owners'
+    url_query_params = {'includeInactive': True}
+    url_query_str = urllib.parse.urlencode(url_query_params)
 
-    # STEP 1: get the stage info
+    page_url = url + '?' + url_query_str
+    response = requests_retry_session().get(page_url, headers=headers)
+    response.raise_for_status()
+    content = response.json()
+    data = content
+
+    owners = {}
+    for item in data:
+        owners[item.get('ownerId')] = item
+
+    # STEP 2: get the stage info
     headers = {
         'Authorization': 'Bearer ' + auth_token,
     }
@@ -137,7 +164,7 @@ def get_data(params):
         for s in item.get('stages',[]):
             stages[s.get('stageId')] = s
 
-    # STEP 2: get the deal info
+    # STEP 3: get the deal info
     headers = {
         'Authorization': 'Bearer ' + auth_token,
     }
@@ -172,7 +199,7 @@ def get_data(params):
 
         buffer = ''
         for item in data:
-            item = get_item_info(item, stages)
+            item = get_item_info(item, owners, stages)
             buffer = buffer + json.dumps(item, default=to_string) + "\n"
         yield buffer
 
@@ -219,14 +246,19 @@ def to_integer(value):
     except ValueError:
         return ''
 
-def get_item_info(item, stages):
+def get_item_info(item, owners, stages):
 
     info = OrderedDict()
 
     info['portal_id'] = to_integer(item.get('portalId'))
+
+    owner_id = to_integer(item.get('properties',{}).get('hubspot_owner_id',{}).get('value'))
+    info['owner_id'] = owner_id
+    info['owner_first_name'] = owners.get(owner_id,{}).get('firstName')
+    info['owner_last_name'] = owners.get(owner_id,{}).get('lastName')
+
     info['deal_id'] = to_integer(item.get('dealId'))
     info['deal_name'] = item.get('properties',{}).get('dealname',{}).get('value','')
-    info['deal_owner'] = to_integer(item.get('properties',{}).get('hubspot_owner_id',{}).get('value'))
 
     deal_stage_id =  to_integer(item.get('properties',{}).get('dealstage',{}).get('value'))
     info['deal_stage_id'] = deal_stage_id

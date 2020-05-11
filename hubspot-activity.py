@@ -15,12 +15,12 @@
 #     description: Filter to apply with key/values specified as a URL query string where the keys correspond to the properties to filter.
 #     required: false
 # returns:
-#   - name: engagement_id
-#     type: integer
-#     description: The id for the engagement
 #   - name: portal_id
 #     type: integer
 #     description: The portal id for the engagement
+#   - name: engagement_id
+#     type: integer
+#     description: The id for the engagement
 #   - name: deal_id
 #     type: string
 #     description: The deal id for the engagement
@@ -157,8 +157,8 @@ def get_item_info(item):
 
     info = OrderedDict()
 
-    info['engagement_id'] = item.get('engagement',{}).get('id')
     info['portal_id'] = item.get('engagement',{}).get('portalId','')
+    info['engagement_id'] = item.get('engagement',{}).get('id')
     info['deal_id'] = ''
     ids = item.get('associations',{}).get('dealIds',[])
     if len(ids) > 0:

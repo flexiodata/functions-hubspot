@@ -15,12 +15,12 @@
 #     description: Filter to apply with key/values specified as a URL query string where the keys correspond to the properties to filter.
 #     required: false
 # returns:
-#   - name: vid
-#     type: integer
-#     description: The id for the contact
 #   - name: portal_id
 #     type: integer
 #     description: The portal id for the contact
+#   - name: vid
+#     type: integer
+#     description: The id for the contact
 #   - name: first_name
 #     type: string
 #     description: The first name of the contact
@@ -169,8 +169,8 @@ def get_item_info(item):
 
     info = OrderedDict()
 
-    info['vid'] = item.get('vid')
     info['portal_id'] = item.get('portal-id')
+    info['vid'] = item.get('vid')
     info['first_name'] = item.get('properties').get('firstname',{}).get('value','')
     info['last_name'] = item.get('properties').get('lastname',{}).get('value','')
     info['email'] = item.get('properties').get('email',{}).get('value','')

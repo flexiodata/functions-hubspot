@@ -16,10 +16,10 @@
 #     required: false
 # returns:
 #   - name: engagement_id
-#     type: string
+#     type: integer
 #     description: The id for the engagement
 #   - name: portal_id
-#     type: string
+#     type: integer
 #     description: The portal id for the engagement
 #   - name: deal_id
 #     type: string
@@ -49,7 +49,7 @@
 #     type: string
 #     description: The status of the engagement; true if the engagement is active and false otherwise
 #   - name: created_by
-#     type: string
+#     type: integer
 #     description: The id of the creator of the engagement
 #   - name: created_at
 #     type: string
@@ -157,8 +157,8 @@ def get_item_info(item):
 
     info = OrderedDict()
 
-    info['engagement_id'] = str(item.get('engagement',{}).get('id',''))
-    info['portal_id'] = str(item.get('engagement',{}).get('portalId',''))
+    info['engagement_id'] = item.get('engagement',{}).get('id')
+    info['portal_id'] = item.get('engagement',{}).get('portalId','')
     info['deal_id'] = ''
     ids = item.get('associations',{}).get('dealIds',[])
     if len(ids) > 0:
@@ -174,7 +174,7 @@ def get_item_info(item):
     info['title'] = item.get('metadata',{}).get('title','')
     info['subject'] = item.get('metadata',{}).get('subject','')
     info['active'] = item.get('engagement',{}).get('active','')
-    info['created_by'] = str(item.get('engagement',{}).get('createdBy',''))
+    info['created_by'] = item.get('engagement',{}).get('createdBy','')
     info['created_at'] = to_date(item.get('engagement',{}).get('createdAt',None))
     info['updated_at'] = to_date(item.get('engagement',{}).get('lastUpdated',None))
 

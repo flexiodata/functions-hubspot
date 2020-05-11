@@ -34,7 +34,7 @@
 #     type: string
 #     description: The deal name
 #   - name: deal_stage_id
-#     type: integer
+#     type: string
 #     description: The deal stage id
 #   - name: deal_stage_label
 #     type: string
@@ -260,7 +260,7 @@ def get_item_info(item, owners, stages):
     info['deal_id'] = to_integer(item.get('dealId'))
     info['deal_name'] = item.get('properties',{}).get('dealname',{}).get('value','')
 
-    deal_stage_id =  to_integer(item.get('properties',{}).get('dealstage',{}).get('value'))
+    deal_stage_id =  item.get('properties',{}).get('dealstage',{}).get('value') # note: this id can contain strings (e.g. "closed")
     info['deal_stage_id'] = deal_stage_id
     info['deal_stage_label'] = stages.get(deal_stage_id,{}).get('label','')
 

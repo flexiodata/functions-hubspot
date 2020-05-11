@@ -16,19 +16,19 @@
 #     required: false
 # returns:
 #   - name: portal_id
-#     type: string
+#     type: integer
 #     description: The portal id for the deal
 #   - name: deal_id
-#     type: string
+#     type: integer
 #     description: The deal id for the deal
 #   - name: deal_name
 #     type: string
 #     description: The deal name
 #   - name: deal_owner
-#     type: string
+#     type: integer
 #     description: The deal owner
 #   - name: deal_stage_id
-#     type: string
+#     type: integer
 #     description: The deal stage id
 #   - name: deal_stage_label
 #     type: string
@@ -37,10 +37,10 @@
 #     type: string
 #     description: The deal type
 #   - name: amount
-#     type: string
+#     type: integer
 #     description: The deal mount
 #   - name: amount_in_home_currency
-#     type: string
+#     type: integer
 #     description: The deal amount in home currency
 #   - name: closed_lost_reason
 #     type: string
@@ -61,13 +61,13 @@
 #     type: string
 #     description: The pipeline
 #   - name: num_notes
-#     type: string
+#     type: integer
 #     description: The number of notes
 #   - name: num_associated_contacts
-#     type: string
+#     type: integer
 #     description: The number of associated contacts
 #   - name: num_contacted_notes
-#     type: string
+#     type: integer
 #     description: The number of contact-related notes
 #   - name: notes_last_contacted
 #     type: string
@@ -223,12 +223,12 @@ def get_item_info(item, stages):
 
     info = OrderedDict()
 
-    info['portal_id'] = str(item.get('portalId',''))
-    info['deal_id'] = str(item.get('dealId',''))
+    info['portal_id'] = to_integer(item.get('portalId'))
+    info['deal_id'] = to_integer(item.get('dealId'))
     info['deal_name'] = item.get('properties',{}).get('dealname',{}).get('value','')
-    info['deal_owner'] = str(item.get('properties',{}).get('hubspot_owner_id',{}).get('value',''))
+    info['deal_owner'] = to_integer(item.get('properties',{}).get('hubspot_owner_id',{}).get('value'))
 
-    deal_stage_id =  item.get('properties',{}).get('dealstage',{}).get('value','')
+    deal_stage_id =  to_integer(item.get('properties',{}).get('dealstage',{}).get('value'))
     info['deal_stage_id'] = deal_stage_id
     info['deal_stage_label'] = stages.get('deal_stage_id',{}).get('label','')
 

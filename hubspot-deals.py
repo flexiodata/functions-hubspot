@@ -27,9 +27,12 @@
 #   - name: deal_owner
 #     type: string
 #     description: The deal owner
-#   - name: deal_stage
+#   - name: deal_stage_id
 #     type: string
-#     description: The deal stage
+#     description: The deal stage id
+#   - name: deal_stage_label
+#     type: string
+#     description: The deal stage label
 #   - name: deal_type
 #     type: string
 #     description: The deal type
@@ -106,10 +109,35 @@ def get_data(params):
     # https://knowledge.hubspot.com/deals/hubspots-default-deal-properties
     # https://developers.hubspot.com/docs/methods/deals/get-all-deals
 
-    # see here: to get all available deal properties:
+    # see here to get all available deal properties:
     # https://developers.hubspot.com/docs/methods/deals/get_deal_properties
     # example: https://api.hubapi.com/properties/v1/deals/properties?hapikey=demo
 
+    # see here to get deal stage information:
+    # https://developers.hubspot.com/docs/methods/pipelines/pipelines_overview
+    # https://developers.hubspot.com/docs/methods/pipelines/get_pipelines_for_object_type
+
+
+    # STEP 1: get the stage info
+    headers = {
+        'Authorization': 'Bearer ' + auth_token,
+    }
+    url = 'https://api.hubapi.com/crm-pipelines/v1/pipelines/deals'
+    url_query_params = {'includeInactive': 'INCLUDE_DELETED'}
+    url_query_str = urllib.parse.urlencode(url_query_params)
+
+    page_url = url + '?' + url_query_str
+    response = requests_retry_session().get(page_url, headers=headers)
+    response.raise_for_status()
+    content = response.json()
+    data = content.get('results',[])
+
+    stages = {}
+    for item in data:
+        for s in item.get('stages',[]):
+            stages[s.get('stageId')] = s
+
+    # STEP 2: get the deal info
     headers = {
         'Authorization': 'Bearer ' + auth_token,
     }
@@ -144,7 +172,7 @@ def get_data(params):
 
         buffer = ''
         for item in data:
-            item = get_item_info(item)
+            item = get_item_info(item, stages)
             buffer = buffer + json.dumps(item, default=to_string) + "\n"
         yield buffer
 
@@ -191,7 +219,7 @@ def to_integer(value):
     except ValueError:
         return ''
 
-def get_item_info(item):
+def get_item_info(item, stages):
 
     info = OrderedDict()
 
@@ -199,7 +227,11 @@ def get_item_info(item):
     info['deal_id'] = str(item.get('dealId',''))
     info['deal_name'] = item.get('properties',{}).get('dealname',{}).get('value','')
     info['deal_owner'] = str(item.get('properties',{}).get('hubspot_owner_id',{}).get('value',''))
-    info['deal_stage'] = item.get('properties',{}).get('dealstage',{}).get('value','')
+
+    deal_stage_id =  item.get('properties',{}).get('dealstage',{}).get('value','')
+    info['deal_stage_id'] = deal_stage_id
+    info['deal_stage_label'] = stages.get('deal_stage_id',{}).get('label','')
+
     info['deal_type'] = item.get('properties',{}).get('dealtype',{}).get('value','')
     info['amount'] = to_integer(item.get('properties',{}).get('amount',{}).get('value',''))
     info['amount_in_home_currency'] = to_integer(item.get('properties',{}).get('amount_in_home_currency',{}).get('value',''))
@@ -218,3 +250,4 @@ def get_item_info(item):
     info['created_at'] = to_date(item.get('properties',{}).get('createdate',{}).get('value',None))
 
     return info
+

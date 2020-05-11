@@ -79,6 +79,7 @@
 #     type: string
 #     description: The date the deal was added to the system
 # examples:
+#   - ' '
 # ---
 
 import json

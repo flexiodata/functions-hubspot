@@ -18,6 +18,15 @@
 #   - name: portal_id
 #     type: integer
 #     description: The portal id for the engagement
+#   - name: owner_id
+#     type: integer
+#     description: The id of the owner of the engagement
+#   - name: owner_first_name
+#     type: string
+#     description: The first name of the owner of the engagement
+#   - name: owner_last_name
+#     type: string
+#     description: The last name of the owner of the engagement
 #   - name: engagement_id
 #     type: integer
 #     description: The id for the engagement
@@ -87,6 +96,29 @@ def get_data(params):
     # https://developers.hubspot.com/docs/methods/engagements/engagements-overview
     # note: pagination mechanism different from other api calls; compare deal pagination
 
+    # see here to get owner information:
+    # https://developers.hubspot.com/docs/methods/owners/owners_overview
+    # https://developers.hubspot.com/docs/methods/owners/get_owners
+
+    # STEP 1: get the owner info
+    headers = {
+        'Authorization': 'Bearer ' + auth_token,
+    }
+    url = 'https://api.hubapi.com/owners/v2/owners'
+    url_query_params = {'includeInactive': True}
+    url_query_str = urllib.parse.urlencode(url_query_params)
+
+    page_url = url + '?' + url_query_str
+    response = requests_retry_session().get(page_url, headers=headers)
+    response.raise_for_status()
+    content = response.json()
+    data = content
+
+    owners = {}
+    for item in data:
+        owners[item.get('ownerId')] = item
+
+    # STEP 3: get the engagement info
     headers = {
         'Authorization': 'Bearer ' + auth_token,
     }
@@ -112,7 +144,7 @@ def get_data(params):
 
         buffer = ''
         for item in data:
-            item = get_item_info(item)
+            item = get_item_info(item, owners)
             buffer = buffer + json.dumps(item, default=to_string) + "\n"
         yield buffer
 
@@ -146,6 +178,12 @@ def to_date(ts):
         return ''
     return datetime.utcfromtimestamp(int(ts)/1000).strftime('%Y-%m-%d %H:%M:%S')
 
+def to_integer(value):
+    try:
+        return int(value)
+    except:
+        return value
+
 def to_string(value):
     if isinstance(value, (date, datetime)):
         return value.isoformat()
@@ -153,16 +191,23 @@ def to_string(value):
         return str(value)
     return value
 
-def get_item_info(item):
+def get_item_info(item, owners):
 
     info = OrderedDict()
 
-    info['portal_id'] = item.get('engagement',{}).get('portalId','')
-    info['engagement_id'] = item.get('engagement',{}).get('id')
+    info['portal_id'] = to_integer(item.get('engagement',{}).get('portalId'))
+
+    owner_id = to_integer(item.get('engagement',{}).get('ownerId'))
+    info['owner_id'] = owner_id
+    info['owner_first_name'] = owners.get(owner_id,{}).get('firstName')
+    info['owner_last_name'] = owners.get(owner_id,{}).get('lastName')
+
+    info['engagement_id'] = to_integer(item.get('engagement',{}).get('id'))
     info['deal_id'] = ''
     ids = item.get('associations',{}).get('dealIds',[])
     if len(ids) > 0:
         info['deal_id'] = str(ids[0])
+
     info['company_id'] = ''
     ids = item.get('associations',{}).get('companyIds',[])
     if len(ids) > 0:
@@ -174,7 +219,7 @@ def get_item_info(item):
     info['title'] = item.get('metadata',{}).get('title','')
     info['subject'] = item.get('metadata',{}).get('subject','')
     info['active'] = item.get('engagement',{}).get('active','')
-    info['created_by'] = item.get('engagement',{}).get('createdBy','')
+    info['created_by'] = to_integer(item.get('engagement',{}).get('createdBy'))
     info['created_at'] = to_date(item.get('engagement',{}).get('createdAt',None))
     info['updated_at'] = to_date(item.get('engagement',{}).get('lastUpdated',None))
 

@@ -158,6 +158,12 @@ def to_date(ts):
         return ''
     return datetime.utcfromtimestamp(int(ts)/1000).strftime('%Y-%m-%d %H:%M:%S')
 
+def to_integer(value):
+    try:
+        return int(value)
+    except:
+        return value
+
 def to_string(value):
     if isinstance(value, (date, datetime)):
         return value.isoformat()

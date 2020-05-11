@@ -262,7 +262,7 @@ def get_item_info(item, owners, stages):
 
     deal_stage_id =  to_integer(item.get('properties',{}).get('dealstage',{}).get('value'))
     info['deal_stage_id'] = deal_stage_id
-    info['deal_stage_label'] = stages.get('deal_stage_id',{}).get('label','')
+    info['deal_stage_label'] = stages.get(deal_stage_id,{}).get('label','')
 
     info['deal_type'] = item.get('properties',{}).get('dealtype',{}).get('value','')
     info['amount'] = to_integer(item.get('properties',{}).get('amount',{}).get('value',''))

@@ -31,11 +31,11 @@
 #     type: integer
 #     description: The id for the engagement
 #   - name: deal_id
-#     type: string
+#     type: integer
 #     description: The deal id for the engagement
-#   - name: company_id
+#   - name: company_ids
 #     type: string
-#     description: The company id for the engagement
+#     description: A delimited list of company ids associated with the engagement
 #   - name: type
 #     type: string
 #     description: The type of the engagement
@@ -143,9 +143,14 @@ def get_data(params):
             break
 
         buffer = ''
-        for item in data:
-            item = get_item_info(item, owners)
-            buffer = buffer + json.dumps(item, default=to_string) + "\n"
+        for header_item in data:
+            deal_items = header_item.get('associations',{}).get('dealIds')
+            if deal_items is None or len(deal_items) == 0:
+                deal_items = [None] # if no deals, use empty deal so we return activity information
+            for deal_id in deal_items:
+                detail_item = {'deal_id': deal_id}
+                item = get_item_info(header_item, detail_item, owners)
+                buffer = buffer + json.dumps(item, default=to_string) + "\n"
         yield buffer
 
         has_more = content.get('hasMore', False)
@@ -191,36 +196,32 @@ def to_string(value):
         return str(value)
     return value
 
-def get_item_info(item, owners):
+def get_item_info(header_item, detail_item, owners):
 
     info = OrderedDict()
 
-    info['portal_id'] = to_integer(item.get('engagement',{}).get('portalId'))
+    info['portal_id'] = to_integer(header_item.get('engagement',{}).get('portalId'))
 
-    owner_id = to_integer(item.get('engagement',{}).get('ownerId'))
+    owner_id = to_integer(header_item.get('engagement',{}).get('ownerId'))
     info['owner_id'] = owner_id
     info['owner_first_name'] = owners.get(owner_id,{}).get('firstName')
     info['owner_last_name'] = owners.get(owner_id,{}).get('lastName')
 
-    info['engagement_id'] = to_integer(item.get('engagement',{}).get('id'))
-    info['deal_id'] = ''
-    ids = item.get('associations',{}).get('dealIds',[])
-    if len(ids) > 0:
-        info['deal_id'] = str(ids[0])
+    info['engagement_id'] = to_integer(header_item.get('engagement',{}).get('id'))
+    info['deal_id'] = to_integer(detail_item.get('deal_id',None))
 
-    info['company_id'] = ''
-    ids = item.get('associations',{}).get('companyIds',[])
-    if len(ids) > 0:
-        info['company_id'] = str(ids[0])
-    info['type'] = item.get('engagement',{}).get('type','').lower()
-    info['activity_type'] = item.get('engagement',{}).get('activityType','')
-    info['activity_date'] = to_date(item.get('engagement',{}).get('timestamp',None))
-    info['status'] = item.get('metadata',{}).get('status','')
-    info['title'] = item.get('metadata',{}).get('title','')
-    info['subject'] = item.get('metadata',{}).get('subject','')
-    info['active'] = item.get('engagement',{}).get('active','')
-    info['created_by'] = to_integer(item.get('engagement',{}).get('createdBy'))
-    info['created_at'] = to_date(item.get('engagement',{}).get('createdAt',None))
-    info['updated_at'] = to_date(item.get('engagement',{}).get('lastUpdated',None))
+    company_ids = header_item.get('associations',{}).get('companyIds',[])
+    info['company_ids'] = ', '.join([str(i) for i in company_ids]) # convert to comma-delimited string
+
+    info['type'] = header_item.get('engagement',{}).get('type','').lower()
+    info['activity_type'] = header_item.get('engagement',{}).get('activityType','')
+    info['activity_date'] = to_date(header_item.get('engagement',{}).get('timestamp',None))
+    info['status'] = header_item.get('metadata',{}).get('status','')
+    info['title'] = header_item.get('metadata',{}).get('title','')
+    info['subject'] = header_item.get('metadata',{}).get('subject','')
+    info['active'] = header_item.get('engagement',{}).get('active','')
+    info['created_by'] = to_integer(header_item.get('engagement',{}).get('createdBy'))
+    info['created_at'] = to_date(header_item.get('engagement',{}).get('createdAt',None))
+    info['updated_at'] = to_date(header_item.get('engagement',{}).get('lastUpdated',None))
 
     return info

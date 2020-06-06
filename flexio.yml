@@ -11,29 +11,29 @@ templates:
     description: 'Import and filter data for your sales pipeline in HubSpot'
     gsheets_spreadsheet_id: ''
     excel_spreadsheet_path: ''
-    in_production: false
-    in_staging: false
+    is_public: false
+    is_private: false
   - name: lookup-activity
     title: 'Lookup recent sales activity'
     description: 'Import and filter data for recent sales activity'
     gsheets_spreadsheet_id: ''
     excel_spreadsheet_path: ''
-    in_production: false
-    in_staging: false
+    is_public: false
+    is_private: false
   - name: lookup-contacts
     title: 'Lookup contacts in HubSpot'
     description: 'Search and filter data for contacts in your spreadsheet'
     gsheets_spreadsheet_id: ''
     excel_spreadsheet_path: ''
-    in_production: false
-    in_staging: false
+    is_public: false
+    is_private: false
   - name: lookup-companies
     title: 'Lookup companies in HubSpot'
     description: 'Search and filter data for companies in your spreadsheet'
     gsheets_spreadsheet_id: ''
     excel_spreadsheet_path: ''
-    in_production: false
-    in_staging: false
+    is_public: false
+    is_private: false
 
 functions:
   - path: hubspot-activity.py

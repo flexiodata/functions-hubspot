@@ -137,7 +137,7 @@ def get_data(params):
 def requests_retry_session(
     retries=3,
     backoff_factor=0.3,
-    status_forcelist=(500, 502, 504),
+    status_forcelist=(429, 500, 502, 503, 504),
     session=None,
 ):
     session = session or requests.Session()
